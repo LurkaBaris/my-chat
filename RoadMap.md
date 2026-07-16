@@ -128,3 +128,46 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
 
 ---
+
+## ЭТАП 1 — Регистрация и логин
+
+### Задача 1.1 — Установка и конфиг Auth.js v5
+
+**Что сделать:**
+
+- `npm i next-auth@beta @auth/prisma-adapter bcryptjs`, типы для bcrypt.
+- Сгенерировать `AUTH_SECRET` (`npx auth secret`) → в `.env`.
+- Разделить конфиг на два файла (edge-совместимость):
+  - `auth.config.ts` — провайдеры и callbacks (без Prisma, edge-safe);
+  - `auth.ts` — основной инстанс с `PrismaAdapter` и JWT-стратегией.
+- Роут-хендлер `app/api/auth/[...nextauth]/route.ts`.
+
+**Критерии приёмки:**
+
+- [ ] Проект собирается с подключённым Auth.js
+- [ ] `AUTH_SECRET` в `.env`
+- [ ] Конфиг разделён на `auth.config.ts` / `auth.ts`
+
+**Ориентир:**
+
+```ts
+// auth.ts
+import NextAuth from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
+import authConfig from "./auth.config";
+
+export const { auth, handlers, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: "jwt" },
+  ...authConfig,
+});
+```
+
+```ts
+// app/api/auth/[...nextauth]/route.ts
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
+```
+
+---
