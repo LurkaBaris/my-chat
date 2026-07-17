@@ -1,20 +1,20 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
-import { RegisterPage } from '@/_pages/register'
+import { LoginPage } from '@/_pages/login'
 import { auth } from '@/shared/lib/index.server'
 
 export const metadata: Metadata = {
-  title: 'Регистрация | My Chat',
-  description: 'Создайте аккаунт в My Chat',
+  title: 'Вход | My Chat',
+  description: 'Войдите в аккаунт My Chat',
 }
 
-export default async function RegisterRoute() {
+export default async function LoginRoute() {
   const session = await auth()
 
   if (session?.user) {
     redirect('/')
   }
 
-  return <RegisterPage />
+  return <LoginPage />
 }

@@ -5,7 +5,7 @@ import NextAuth from 'next-auth'
 
 import { prisma } from '@/shared/db/index.server'
 
-import authConfig from './auth.config'
+import { authConfig } from './auth.config'
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   ...authConfig,

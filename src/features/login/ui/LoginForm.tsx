@@ -2,61 +2,54 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, PasswordInput, Stack, TextInput } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
 
-import { registerUser } from '../actions/registerUser.action'
-import { signUpSchema, type SignUpSchemaType } from '../model/signUpSchema'
+import { credentialsSchema, type CredentialsSchemaType } from '@/shared/lib'
 
-export const SignUpForm = () => {
+export const LoginForm = () => {
+  const router = useRouter()
   const {
     control,
     handleSubmit,
     clearErrors,
-    reset,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpSchemaType>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<CredentialsSchemaType>({
+    resolver: zodResolver(credentialsSchema),
     defaultValues: {
-      name: '',
       email: '',
       password: '',
-      confirmPassword: '',
     },
     mode: 'onTouched',
   })
 
-  const onSubmit: SubmitHandler<SignUpSchemaType> = async (data) => {
+  const onSubmit: SubmitHandler<CredentialsSchemaType> = async (data) => {
     clearErrors('root')
 
-    const result = await registerUser(data)
+    try {
+      const result = await signIn('credentials', {
+        ...data,
+        redirect: false,
+      })
 
-    if (!result.success) {
-      if (result.field === 'email') {
-        setError('email', {
+      if (!result.ok || result.error) {
+        setError('root.server', {
           type: 'server',
-          message: result.message,
+          message: 'Неверный email или пароль',
         })
 
         return
       }
 
+      router.replace('/')
+    } catch {
       setError('root.server', {
         type: 'server',
-        message: result.message,
+        message: 'Не удалось войти. Попробуйте ещё раз',
       })
-
-      return
     }
-
-    reset()
-    notifications.show({
-      title: 'Регистрация завершена',
-      message: 'Вы успешно зарегистрировались',
-      color: 'primary',
-      withBorder: true,
-    })
   }
 
   return (
@@ -79,22 +72,6 @@ export const SignUpForm = () => {
             {errors.root.server.message}
           </Alert>
         )}
-
-        <Controller
-          name="name"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextInput
-              {...field}
-              size="xs"
-              label="Имя"
-              placeholder="Введите имя"
-              autoComplete="name"
-              error={fieldState.error?.message}
-              withAsterisk
-            />
-          )}
-        />
 
         <Controller
           name="email"
@@ -124,23 +101,7 @@ export const SignUpForm = () => {
               size="xs"
               label="Пароль"
               placeholder="Введите пароль"
-              autoComplete="new-password"
-              error={fieldState.error?.message}
-              withAsterisk
-            />
-          )}
-        />
-
-        <Controller
-          name="confirmPassword"
-          control={control}
-          render={({ field, fieldState }) => (
-            <PasswordInput
-              {...field}
-              size="xs"
-              label="Повторите пароль"
-              placeholder="Введите пароль ещё раз"
-              autoComplete="new-password"
+              autoComplete="current-password"
               error={fieldState.error?.message}
               withAsterisk
             />
@@ -148,7 +109,7 @@ export const SignUpForm = () => {
         />
 
         <Button type="submit" size="sm" fz={13} loading={isSubmitting} fullWidth>
-          Зарегистрироваться
+          Войти
         </Button>
       </Stack>
     </form>
