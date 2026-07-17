@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import nextLogo from '@/shared/assets/next.svg'
 import vercelLogo from '@/shared/assets/vercel.svg'
-import styles from './home-page.module.css'
+import styles from './HomePage.module.css'
 
 export const HomePage = () => {
   return (
