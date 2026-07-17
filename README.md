@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chat App
 
-## Getting Started
+Чат с регистрацией и авторизацией, личными беседами и доставкой сообщений. На первом
+этапе обновление сообщений будет работать через polling, затем при необходимости через
+SSE или Realtime.
 
-First, run the development server:
+## Целевой стек
+
+- Next.js 16 с App Router и Server Actions
+- React 19
+- TypeScript
+- Auth.js v5 с Credentials provider и JWT-сессиями
+- PostgreSQL
+- Prisma v6
+- bcryptjs
+- CSS Modules
+- Feature-Sliced Design
+- ESLint
+- Prettier
+
+## Запуск проекта
+
+Установить зависимости:
+
+```bash
+npm i
+```
+
+Создать локальный файл окружения на основе примера:
+
+```bash
+cp .env.example .env.local
+```
+
+Запустить dev-сервер:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+После запуска приложение будет доступно по адресу
+[http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Проверки
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Проверить TypeScript без сборки:
 
-## Learn More
+```bash
+npm run type-check
+```
 
-To learn more about Next.js, take a look at the following resources:
+Собрать production-версию:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Запустить ESLint:
 
-## Deploy on Vercel
+```bash
+npm run lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Автоматически исправить доступные lint-ошибки:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint:fix
+```
+
+Проверить форматирование:
+
+```bash
+npm run format:check
+```
+
+Отформатировать проект:
+
+```bash
+npm run format
+```
+
+Запустить TypeScript, ESLint и проверку форматирования одной командой:
+
+```bash
+npm run check
+```
+
+Команда `npm run check` также автоматически запускается Husky перед `git push`.
+
+Запустить собранное приложение:
+
+```bash
+npm run start
+```
+
+## Переменные окружения
+
+Пример переменных находится в `.env.example`. Локальные значения хранятся в `.env.local` и не должны попадать в Git.
+
+- `POSTGRES_USER` — пользователь локальной базы данных
+- `POSTGRES_PASSWORD` — пароль пользователя локальной базы данных
+- `POSTGRES_DB` — название локальной базы данных
+- `POSTGRES_HOST` — адрес PostgreSQL
+- `POSTGRES_PORT` — порт PostgreSQL
+- `DATABASE_URL` — готовая строка подключения для Prisma
+- `AUTH_SECRET` — секрет Auth.js; будет сгенерирован на этапе настройки авторизации
+
+## Структура проекта
+
+Проект организован по FSD с учётом соглашений Next.js App Router:
+
+```text
+app               — маршруты, layout и metadata Next.js
+src/_app          — глобальные стили и конфигурация приложения
+src/_pages        — страницы приложения
+src/widgets       — крупные самостоятельные UI-блоки
+src/features      — пользовательские сценарии
+src/entities      — бизнес-сущности
+src/shared        — переиспользуемый UI, утилиты, конфигурация и ресурсы
+public            — файлы, доступные напрямую по URL
+```
