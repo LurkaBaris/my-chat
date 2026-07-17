@@ -171,3 +171,65 @@ export const { GET, POST } = handlers;
 ```
 
 ---
+
+### Задача 1.2 — Регистрация (signup) — пишется вручную
+
+**Что сделать:**
+
+- Server action `registerUser` (или route handler) — **не** через Auth.js.
+- Валидация ввода через **Zod** (знакомо по task-manager): email, пароль (мин. длина).
+- Проверка, что email не занят.
+- Хэш пароля: `bcrypt.hash(password, 10)` → сохранить в `User.passwordHash`.
+- Форма регистрации (React Hook Form + Zod — как в прошлом проекте).
+- Понятные ошибки («email занят», «пароль слишком короткий»).
+
+**Критерии приёмки:**
+
+- [ ] Новый юзер появляется в БД (виден в Prisma Studio)
+- [ ] В БД хранится **хэш**, а не открытый пароль
+- [ ] Повторный email отклоняется с внятной ошибкой
+- [ ] Пароль короче минимума не проходит валидацию (сервер, не только клиент)
+- [ ] Пароль/хэш нигде не попадает в логи и в ответ клиенту
+
+---
+
+### Задача 1.3 — Логин (Credentials provider)
+
+**Что сделать:**
+
+- В `auth.config.ts` — `Credentials`-провайдер с `authorize`:
+  - найти юзера по email;
+  - сравнить пароль через `bcrypt.compare`;
+  - вернуть безопасный объект юзера (**без** `passwordHash`) или бросить ошибку.
+- Форма логина, вызов `signIn('credentials', ...)`.
+- Callbacks `jwt` / `session` — положить `user.id` в токен и сессию.
+
+**Критерии приёмки:**
+
+- [ ] Верные email+пароль → успешный вход, сессия создана
+- [ ] Неверный пароль / несуществующий email → ошибка, без входа
+- [ ] `passwordHash` **никогда** не возвращается из `authorize`
+- [ ] `session.user.id` доступен на сервере через `auth()`
+- [ ] Logout (`signOut`) завершает сессию
+
+**Ориентир:**
+
+```ts
+// auth.config.ts
+import Credentials from "next-auth/providers/credentials";
+import type { NextAuthConfig } from "next-auth";
+
+export default {
+  providers: [
+    Credentials({
+      credentials: { email: {}, password: {} },
+      authorize: async (credentials) => {
+        // 1. валидировать credentials (Zod)
+        // 2. найти юзера в БД по email
+        // 3. bcrypt.compare(пароль, user.passwordHash)
+        // 4. вернуть { id, email, name } БЕЗ passwordHash, либо null/throw
+      },
+    }),
+  ],
+} satisfies NextAuthConfig;
+```
