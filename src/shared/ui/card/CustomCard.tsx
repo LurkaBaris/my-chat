@@ -1,14 +1,15 @@
 import { Card } from 'antd'
 import Paragraph from 'antd/es/typography/Paragraph'
-import type { PropsWithChildren, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 import styles from './CustomCard.module.css'
 
-type CustomCardProps = PropsWithChildren<{
+interface CustomCardProps {
+  children?: ReactNode
   description: ReactNode
   footer: ReactNode
   title: ReactNode
-}>
+}
 
 export const CustomCard = ({ children, description, footer, title }: CustomCardProps) => {
   return (

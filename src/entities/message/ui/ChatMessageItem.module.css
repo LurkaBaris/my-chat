@@ -1,0 +1,35 @@
+.message {
+  max-width: min(70%, 680px);
+  padding: 10px 12px;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.45;
+  border-radius: 14px;
+}
+
+.incomingMessage {
+  align-self: flex-start;
+  color: var(--chat-color-text);
+  background: var(--chat-color-bg-container);
+  border-top-left-radius: 4px;
+}
+
+.outgoingMessage {
+  align-self: flex-end;
+  color: #ffffff;
+  background: var(--chat-color-primary);
+  border-top-right-radius: 4px;
+}
+
+.author {
+  display: block;
+  margin-bottom: 4px;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.text {
+  margin: 0;
+}

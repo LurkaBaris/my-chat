@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { HomePage } from '@/_pages/home'
+import { LogoutButton } from '@/features/logout/index.server'
 import { auth } from '@/shared/lib/index.server'
 
 export default async function HomeRoute() {
@@ -10,5 +11,5 @@ export default async function HomeRoute() {
     redirect('/login')
   }
 
-  return <HomePage />
+  return <HomePage actions={<LogoutButton iconOnly />} />
 }

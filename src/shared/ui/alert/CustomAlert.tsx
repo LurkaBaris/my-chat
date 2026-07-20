@@ -1,7 +1,7 @@
 'use client'
 
-import Alert from 'antd/es/alert/Alert'
 import type { AlertProps } from 'antd/es/alert/Alert'
+import Alert from 'antd/es/alert/Alert'
 
 type CustomAlertProps = Omit<AlertProps, 'message' | 'styles'>
 

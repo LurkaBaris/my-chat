@@ -91,7 +91,6 @@ export const antdTheme = {
     borderRadius: 8,
     controlHeight: 34,
     fontSize: 14,
-    fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
     boxShadowSecondary: '0 1px 3px rgba(19, 78, 74, 0.08), 0 8px 24px rgba(19, 78, 74, 0.06)',
   },
   components: {
