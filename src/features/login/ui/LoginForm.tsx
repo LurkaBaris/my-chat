@@ -1,12 +1,16 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, PasswordInput, Stack, TextInput } from '@mantine/core'
-import { useRouter } from 'next/navigation'
+import { Button, Form } from 'antd'
 import { signIn } from 'next-auth/react'
-import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
+import { useForm, type SubmitHandler } from 'react-hook-form'
 
 import { credentialsSchema, type CredentialsSchemaType } from '@/shared/lib'
+import { CustomAlert } from '@/shared/ui/alert'
+import { CustomInput, CustomPasswordInput } from '@/shared/ui/input'
+
+import styles from './LoginForm.module.css'
 
 export const LoginForm = () => {
   const router = useRouter()
@@ -53,65 +57,41 @@ export const LoginForm = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Stack gap={12}>
-        {errors.root?.server?.message && (
-          <Alert
-            color="danger"
-            p="xs"
-            radius="sm"
-            role="alert"
-            styles={{
-              message: {
-                color: 'var(--mantine-color-danger-7)',
-                fontSize: 12,
-                lineHeight: 1.35,
-              },
-            }}
-          >
-            {errors.root.server.message}
-          </Alert>
-        )}
+    <Form layout="vertical" noValidate onFinish={() => void handleSubmit(onSubmit)()}>
+      {errors.root?.server?.message && (
+        <Form.Item>
+          <CustomAlert description={errors.root.server.message} title="Ошибка входа" />
+        </Form.Item>
+      )}
 
-        <Controller
-          name="email"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextInput
-              {...field}
-              size="xs"
-              type="email"
-              label="Email"
-              placeholder="example@mail.com"
-              autoComplete="email"
-              autoCapitalize="none"
-              spellCheck={false}
-              error={fieldState.error?.message}
-              withAsterisk
-            />
-          )}
-        />
+      <CustomInput
+        control={control}
+        id="login-email"
+        autoCapitalize="none"
+        autoComplete="email"
+        label="Email"
+        name="email"
+        placeholder="example@mail.com"
+        required
+        spellCheck={false}
+        type="email"
+      />
 
-        <Controller
-          name="password"
-          control={control}
-          render={({ field, fieldState }) => (
-            <PasswordInput
-              {...field}
-              size="xs"
-              label="Пароль"
-              placeholder="Введите пароль"
-              autoComplete="current-password"
-              error={fieldState.error?.message}
-              withAsterisk
-            />
-          )}
-        />
+      <CustomPasswordInput
+        control={control}
+        id="login-password"
+        autoComplete="current-password"
+        label="Пароль"
+        name="password"
+        placeholder="Введите пароль"
+        required
+      />
 
-        <Button type="submit" size="sm" fz={13} loading={isSubmitting} fullWidth>
+      <div className={styles.submit}>
+        <Button block htmlType="submit" loading={isSubmitting} type="primary">
           Войти
         </Button>
-      </Stack>
-    </form>
+      </div>
+    </Form>
   )
 }

@@ -1,12 +1,8 @@
 import type { Metadata } from 'next'
 
-import { RegisterPage } from '@/_pages/register'
+export { RegisterPage as default } from '@/_pages/auth'
 
 export const metadata: Metadata = {
   title: 'Регистрация | My Chat',
   description: 'Создайте аккаунт в My Chat',
-}
-
-export default function RegisterRoute() {
-  return <RegisterPage />
 }

@@ -1,11 +1,11 @@
-import { Button } from '@mantine/core'
+import { Button } from 'antd'
 
 import { logout } from '../actions/logout.action'
 
 export const LogoutButton = () => {
   return (
     <form action={logout}>
-      <Button type="submit" variant="light">
+      <Button htmlType="submit" type="default">
         Выйти из аккаунта
       </Button>
     </form>

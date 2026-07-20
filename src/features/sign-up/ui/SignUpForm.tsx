@@ -1,14 +1,19 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, PasswordInput, Stack, TextInput } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
-import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
+import { App, Button, Form } from 'antd'
+import { useForm, type SubmitHandler } from 'react-hook-form'
+
+import { CustomAlert } from '@/shared/ui/alert'
+import { CustomInput, CustomPasswordInput } from '@/shared/ui/input'
 
 import { registerUser } from '../actions/registerUser.action'
 import { signUpSchema, type SignUpSchemaType } from '../model/signUpSchema'
 
+import styles from './SignUpForm.module.css'
+
 export const SignUpForm = () => {
+  const { notification } = App.useApp()
   const {
     control,
     handleSubmit,
@@ -51,106 +56,68 @@ export const SignUpForm = () => {
     }
 
     reset()
-    notifications.show({
+    notification.success({
+      description: 'Вы успешно зарегистрировались',
       title: 'Регистрация завершена',
-      message: 'Вы успешно зарегистрировались',
-      color: 'primary',
-      withBorder: true,
     })
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Stack gap={12}>
-        {errors.root?.server?.message && (
-          <Alert
-            color="danger"
-            p="xs"
-            radius="sm"
-            role="alert"
-            styles={{
-              message: {
-                color: 'var(--mantine-color-danger-7)',
-                fontSize: 12,
-                lineHeight: 1.35,
-              },
-            }}
-          >
-            {errors.root.server.message}
-          </Alert>
-        )}
+    <Form layout="vertical" noValidate onFinish={() => void handleSubmit(onSubmit)()}>
+      {errors.root?.server?.message && (
+        <Form.Item>
+          <CustomAlert description={errors.root.server.message} title="Ошибка регистрации" />
+        </Form.Item>
+      )}
 
-        <Controller
-          name="name"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextInput
-              {...field}
-              size="xs"
-              label="Имя"
-              placeholder="Введите имя"
-              autoComplete="name"
-              error={fieldState.error?.message}
-              withAsterisk
-            />
-          )}
-        />
+      <CustomInput
+        control={control}
+        autoComplete="name"
+        id="register-name"
+        label="Имя"
+        name="name"
+        placeholder="Введите имя"
+        required
+      />
 
-        <Controller
-          name="email"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextInput
-              {...field}
-              size="xs"
-              type="email"
-              label="Email"
-              placeholder="example@mail.com"
-              autoComplete="email"
-              autoCapitalize="none"
-              spellCheck={false}
-              error={fieldState.error?.message}
-              withAsterisk
-            />
-          )}
-        />
+      <CustomInput
+        control={control}
+        autoCapitalize="none"
+        autoComplete="email"
+        id="register-email"
+        label="Email"
+        name="email"
+        placeholder="example@mail.com"
+        required
+        spellCheck={false}
+        type="email"
+      />
 
-        <Controller
-          name="password"
-          control={control}
-          render={({ field, fieldState }) => (
-            <PasswordInput
-              {...field}
-              size="xs"
-              label="Пароль"
-              placeholder="Введите пароль"
-              autoComplete="new-password"
-              error={fieldState.error?.message}
-              withAsterisk
-            />
-          )}
-        />
+      <CustomPasswordInput
+        control={control}
+        autoComplete="new-password"
+        id="register-password"
+        label="Пароль"
+        name="password"
+        placeholder="Введите пароль"
+        required
+      />
 
-        <Controller
-          name="confirmPassword"
-          control={control}
-          render={({ field, fieldState }) => (
-            <PasswordInput
-              {...field}
-              size="xs"
-              label="Повторите пароль"
-              placeholder="Введите пароль ещё раз"
-              autoComplete="new-password"
-              error={fieldState.error?.message}
-              withAsterisk
-            />
-          )}
-        />
+      <CustomPasswordInput
+        control={control}
+        autoComplete="new-password"
+        id="register-confirm-password"
+        label="Повторите пароль"
+        name="confirmPassword"
+        placeholder="Введите пароль ещё раз"
+        required
+      />
 
-        <Button type="submit" size="sm" fz={13} loading={isSubmitting} fullWidth>
+      <div className={styles.submit}>
+        <Button block htmlType="submit" loading={isSubmitting} type="primary">
           Зарегистрироваться
         </Button>
-      </Stack>
-    </form>
+      </div>
+    </Form>
   )
 }

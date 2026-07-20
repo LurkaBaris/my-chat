@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { mantineHtmlProps } from '@mantine/core'
-import '@mantine/core/styles.css'
-import '@mantine/notifications/styles.css'
-import { AppMantineProvider } from '@/_app/providers/mantine'
+import { AntdRegistry } from '@ant-design/nextjs-registry'
+import 'antd/dist/reset.css'
+import { AppAntdProvider } from '@/_app/providers/antd'
 import '@/_app/styles/globals.css'
 
 const geistSans = Geist({
@@ -30,9 +29,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" {...mantineHtmlProps} className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="ru" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <AppMantineProvider>{children}</AppMantineProvider>
+        <AntdRegistry>
+          <AppAntdProvider>{children}</AppAntdProvider>
+        </AntdRegistry>
       </body>
     </html>
   )
