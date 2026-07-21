@@ -10,6 +10,8 @@ import { CustomInput, CustomPasswordInput } from '@/shared/ui/input'
 import { registerUser } from '../actions/registerUser.action'
 import { signUpSchema, type SignUpSchemaType } from '../model/signUpSchema'
 
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import styles from './SignUpForm.module.css'
 
 export const SignUpForm = () => {
@@ -31,35 +33,42 @@ export const SignUpForm = () => {
     },
     mode: 'onTouched',
   })
+  const router = useRouter()
 
   const onSubmit: SubmitHandler<SignUpSchemaType> = async (data) => {
     clearErrors('root')
 
     const result = await registerUser(data)
-
     if (!result.success) {
       if (result.field === 'email') {
-        setError('email', {
-          type: 'server',
-          message: result.message,
-        })
-
-        return
+        setError('email', { type: 'server', message: result.message })
+      } else {
+        setError('root.server', { type: 'server', message: result.message })
       }
-
-      setError('root.server', {
-        type: 'server',
-        message: result.message,
-      })
-
       return
     }
 
-    reset()
-    notification.success({
-      description: 'Вы успешно зарегистрировались',
-      title: 'Регистрация завершена',
+    const signInResult = await signIn('credentials', {
+      email: data.email,
+      password: data.password,
+      redirect: false,
     })
+
+    if (!signInResult || signInResult.error || !signInResult.ok) {
+      setError('root.server', {
+        type: 'server',
+        message: 'Регистрация успешна, но не удалось войти автоматически',
+      })
+      router.replace('/login')
+      return
+    }
+
+    notification.success({
+      title: 'Регистрация завершена',
+      description: 'Вы успешно вошли в аккаунт',
+    })
+    router.replace('/')
+    reset()
   }
 
   return (
