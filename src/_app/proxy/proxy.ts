@@ -1,0 +1,19 @@
+import { auth } from '@/shared/lib/index.server'
+import { NextResponse } from 'next/server'
+
+const isAuthRoute = (pathname: string) => pathname === '/login' || pathname === '/register'
+
+export const authProxy = auth((request) => {
+  const pathname = request.nextUrl.pathname
+  const isAuth = Boolean(request.auth)
+
+  if (!isAuth && !isAuthRoute(pathname)) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  if (isAuth && isAuthRoute(pathname)) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
+  return NextResponse.next()
+})

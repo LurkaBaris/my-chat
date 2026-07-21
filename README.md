@@ -38,7 +38,7 @@ cp .env.example .env
 Заполнить `AUTH_SECRET`. Например:
 
 ```bash
-openssl rand -base64 32
+npx auth secret
 ```
 
 Запустить PostgreSQL:
@@ -150,7 +150,6 @@ npx prisma migrate dev
 - `POSTGRES_USER` — пользователь локальной базы данных
 - `POSTGRES_PASSWORD` — пароль пользователя локальной базы данных
 - `POSTGRES_DB` — название локальной базы данных
-- `POSTGRES_HOST` — адрес PostgreSQL
 - `POSTGRES_PORT` — порт PostgreSQL
 - `DATABASE_URL` — готовая строка подключения для Prisma
 - `AUTH_SECRET` — секрет Auth.js

@@ -19,7 +19,10 @@ export async function registerUser(input: unknown): Promise<RegisterUserResult> 
   const result = signUpSchema.safeParse(input)
 
   if (!result.success) {
-    return { success: false, message: result.error.issues[0].message }
+    return {
+      success: false,
+      message: result.error.issues[0]?.message ?? 'Некорректные данные',
+    }
   }
 
   const { name, email, password } = result.data
