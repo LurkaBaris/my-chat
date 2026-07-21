@@ -1,1 +1,15 @@
-export { HomePage as default } from '@/_pages/home'
+import { redirect } from 'next/navigation'
+
+import { HomePage } from '@/_pages/home'
+import { LogoutButton } from '@/features/logout/index.server'
+import { auth } from '@/shared/lib/index.server'
+
+export default async function HomeRoute() {
+  const session = await auth()
+
+  if (!session?.user) {
+    redirect('/login')
+  }
+
+  return <HomePage actions={<LogoutButton iconOnly />} />
+}

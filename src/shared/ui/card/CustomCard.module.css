@@ -1,0 +1,13 @@
+.card {
+  width: min(100%, 380px);
+  max-width: 380px;
+}
+
+.description {
+  text-align: center;
+}
+
+.footer {
+  margin: 8px 0 0;
+  text-align: center;
+}
