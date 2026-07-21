@@ -118,13 +118,13 @@ model Message {
 
 ```ts
 // lib/prisma.ts
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+export const prisma = globalForPrisma.prisma ?? new PrismaClient()
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 ```
 
 ---
@@ -152,22 +152,22 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 ```ts
 // auth.ts
-import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
-import authConfig from "./auth.config";
+import NextAuth from 'next-auth'
+import { PrismaAdapter } from '@auth/prisma-adapter'
+import { prisma } from '@/lib/prisma'
+import authConfig from './auth.config'
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
+  session: { strategy: 'jwt' },
   ...authConfig,
-});
+})
 ```
 
 ```ts
 // app/api/auth/[...nextauth]/route.ts
-import { handlers } from "@/auth";
-export const { GET, POST } = handlers;
+import { handlers } from '@/auth'
+export const { GET, POST } = handlers
 ```
 
 ---
