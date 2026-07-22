@@ -4,7 +4,7 @@ import { prisma } from '@/shared/db/index.server'
 import { isAuthUser } from '@/shared/lib'
 import { auth } from '@/shared/lib/index.server'
 import { Prisma } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { refresh } from 'next/cache'
 import { startConversationSchema } from '../model/startConversationSchema'
 import type { StartConversationResult } from '../model/types'
 
@@ -67,7 +67,7 @@ export async function startConversationByEmail(data: unknown): Promise<StartConv
       select: { id: true },
     })
 
-    revalidatePath('/chat', 'layout')
+    refresh()
 
     return { success: true, conversationId: conversation.id }
   } catch (error) {
