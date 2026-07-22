@@ -48,7 +48,7 @@ export const LoginForm = () => {
       }
 
       router.refresh()
-      router.replace('/')
+      router.replace('/chat')
     } catch {
       setError('root.server', {
         type: 'server',

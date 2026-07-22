@@ -1,13 +1,7 @@
-export interface MessagePreview {
-  id: string
-  title: string
-  lastMessage: string
-  time: string
-}
+import type { Message as PrismaMessage, User } from '@prisma/client'
 
-export interface ChatMessage {
-  id: string
-  author: string
-  text: string
-  own: boolean
+export type Message = PrismaMessage
+
+export interface MessageWithSender extends Message {
+  sender: Pick<User, 'id' | 'email' | 'name'>
 }

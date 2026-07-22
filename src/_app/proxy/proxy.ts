@@ -7,12 +7,16 @@ export const authProxy = auth((request) => {
   const pathname = request.nextUrl.pathname
   const isAuth = Boolean(request.auth)
 
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/chat', request.url))
+  }
+
   if (!isAuth && !isAuthRoute(pathname)) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (isAuth && isAuthRoute(pathname)) {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/chat', request.url))
   }
 
   return NextResponse.next()

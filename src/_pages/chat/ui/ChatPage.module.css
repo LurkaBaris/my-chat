@@ -111,3 +111,19 @@
 .userActions {
   flex: 0 0 auto;
 }
+
+.emptyState {
+  min-width: 0;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--chat-color-primary-bg);
+}
+
+.emptyStateText {
+  margin: 0;
+  color: var(--chat-color-text-secondary);
+  font-size: 16px;
+  line-height: 1.5;
+}

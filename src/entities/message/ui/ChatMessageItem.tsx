@@ -1,22 +1,21 @@
 import clsx from 'clsx'
 
-import type { ChatMessage } from '../model/types'
+import type { MessageWithSender } from '../model/types'
 import styles from './ChatMessageItem.module.css'
 
 interface ChatMessageItemProps {
-  message: ChatMessage
+  currentUserId: string
+  message: MessageWithSender
 }
 
-export const ChatMessageItem = ({ message }: ChatMessageItemProps) => {
+export const ChatMessageItem = ({ currentUserId, message }: ChatMessageItemProps) => {
+  const isOwn = message.senderId === currentUserId
+  const author = isOwn ? 'Вы' : message.sender.name?.trim() || message.sender.email
+
   return (
-    <div
-      className={clsx(
-        styles.message,
-        message.own ? styles.outgoingMessage : styles.incomingMessage,
-      )}
-    >
-      <span className={styles.author}>{message.author}</span>
-      <p className={styles.text}>{message.text}</p>
+    <div className={clsx(styles.message, isOwn ? styles.outgoingMessage : styles.incomingMessage)}>
+      <span className={styles.author}>{author}</span>
+      <p className={styles.text}>{message.body}</p>
     </div>
   )
 }

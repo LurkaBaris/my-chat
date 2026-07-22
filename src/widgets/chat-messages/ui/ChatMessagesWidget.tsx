@@ -4,24 +4,30 @@ import { Avatar, Button, Flex, Tooltip } from 'antd'
 import TextArea from 'antd/es/input/TextArea.js'
 import { Paperclip } from 'lucide-react'
 
-import { ChatMessageItem, type ChatMessage, type MessagePreview } from '@/entities/message'
+import type { ConversationDetails } from '@/entities/conversation'
+import { ChatMessageItem, type MessageWithSender } from '@/entities/message'
 
 import styles from './ChatMessagesWidget.module.css'
 
 interface ChatMessagesWidgetProps {
-  chat: MessagePreview
-  messages: ChatMessage[]
+  conversation: ConversationDetails
+  currentUserId: string
+  messages: MessageWithSender[]
 }
 
-export const ChatMessagesWidget = ({ chat, messages }: ChatMessagesWidgetProps) => {
+export const ChatMessagesWidget = ({
+  conversation,
+  currentUserId,
+  messages,
+}: ChatMessagesWidgetProps) => {
   return (
     <section className={styles.chatPanel}>
       <header className={styles.chatHeader}>
-        <Avatar className={styles.avatar}>{chat.title[0]}</Avatar>
+        <Avatar className={styles.avatar}>{conversation.displayTitle[0]}</Avatar>
 
         <Flex className={styles.chatInfo} vertical>
           <h2 className={styles.chatTitle} id="active-chat-title">
-            {chat.title}
+            {conversation.displayTitle}
           </h2>
           <span className={styles.chatStatus}>Онлайн</span>
         </Flex>
@@ -29,7 +35,7 @@ export const ChatMessagesWidget = ({ chat, messages }: ChatMessagesWidgetProps) 
 
       <div className={styles.messages}>
         {messages.map((message) => (
-          <ChatMessageItem key={message.id} message={message} />
+          <ChatMessageItem currentUserId={currentUserId} key={message.id} message={message} />
         ))}
       </div>
 
