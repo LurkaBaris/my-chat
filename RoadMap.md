@@ -6,7 +6,7 @@
 Next.js (App Router, Server Actions)
 Auth.js v5 (next-auth@beta) — Credentials provider, свой bcrypt-хэш, JWT-сессии
 PostgreSQL + Prisma (adapter @auth/prisma-adapter)
-Доставка сообщений: polling (этап 1) → SSE/Realtime (этап 2, опционально)
+Доставка сообщений: server actions (этап 2) → WebSocket / Socket.IO (этап 3)
 ```
 
 ### Важные оговорки (прочитать до старта)
@@ -354,5 +354,77 @@ export const config = {
 - [ ] Нельзя создать беседу с самим собой
 - [ ] Клик по беседе открывает её сообщения (из задачи 2.1)
 - [ ] Список отсортирован по времени последнего сообщения
+
+---
+
+### Задача 2.3 — Доработка создания беседы и UX списка
+
+**Что сделать:**
+
+- Обернуть поиск существующего DIRECT + создание новой беседы в `prisma.$transaction` (закрыть гонку двух параллельных `startConversation`).
+- Ошибки при старте чата по email — нейтральные (не раскрывать, существует ли пользователь).
+- Empty-state в сайдбаре, если бесед ещё нет («Начните диалог по email»).
+- Добавить `postinstall: prisma generate` (или явный шаг в README/`check`), чтобы после `npm i` типы Prisma совпадали со схемой.
+
+**Критерии приёмки:**
+
+- [ ] Два параллельных запроса на один и тот же диалог не создают две беседы
+- [ ] Текст ошибки не выдаёт факт существования email в системе
+- [ ] После свежего `npm i` проходит `npm run type-check` без ручного `prisma generate`
+
+---
+
+## ЭТАП 3 — Realtime (WebSocket)
+
+Polling и SSE пропускаем: сразу двусторонний канал, как в «настоящем» чате.
+
+### Задача 3.1 — Доставка сообщений через WebSocket (Socket.IO)
+
+**Контекст:** App Router сам по себе не поднимает долгоживущий WS. Нужен кастомный Node-сервер рядом с Next (или `server.ts` + Socket.IO). Источник истины по-прежнему Postgres + `sendMessage`; сокет только доставляет событие онлайн-клиентам.
+
+**Что сделать:**
+
+- Поднять Socket.IO на том же origin в dev: например `server.ts` + `socket.io`, скрипт запуска в `package.json` (не обычный `next dev` в одиночку). Документировать в README.
+- На `connection`:
+  - достать сессию (cookie Auth.js) и понять `userId`; без сессии — `disconnect`;
+  - клиент шлёт `joinConversation({ conversationId })` → сервер проверяет membership в БД → `socket.join(conversationId)` либо ошибка.
+- После успешного `sendMessage` (server action **или** сокет-событие — на выбор, но запись в БД обязательна **до** emit):
+  - `io.to(conversationId).emit('message:new', payload)` без лишних полей и без `passwordHash`.
+- Клиент на `/chat/[conversationId]`:
+  - подключается к сокету, делает `joinConversation`;
+  - слушает `message:new`, добавляет в ленту **без дублей** (по `id`);
+  - на `unmount` / смене чата — `leaveConversation` + cleanup слушателей.
+- После reconnect снова `join` текущей беседы (Socket.IO переподключается сам — нужно лишь повторить join).
+- Автоскролл вниз только если пользователь был у низа ленты.
+- README: зачем WebSocket; чем отличается от polling/SSE; что in-memory adapter = один процесс (Redis adapter — вне scope).
+
+**Критерии приёмки:**
+
+- [ ] Сообщение второго участника появляется в открытом чате без F5
+- [ ] Неавторизованный сокет отключается; join в чужую беседу отклоняется
+- [ ] Сообщение сначала в БД, потом в сокет (после рестарта история читается из Postgres)
+- [ ] Нет дубликатов в ленте; leave/unmount чистит подписку
+- [ ] После краткого обрыва сети и reconnect новые сообщения снова приходят
+- [ ] README описывает запуск с Socket.IO и ограничение одного инстанса
+
+**Ориентир по событиям:**
+
+```ts
+// клиент → сервер
+joinConversation: { conversationId: string }
+leaveConversation: { conversationId: string }
+
+// сервер → клиент
+message:new: {
+  id: string
+  conversationId: string
+  body: string
+  senderId: string
+  createdAt: string
+  sender: { id: string; name: string | null; email: string }
+}
+```
+
+**Важно:** не тащить бизнес-логику «только в сокет». Сохранение в Prisma — обязательный шаг; сокет — транспорт уведомления, не единственное хранилище.
 
 ---
