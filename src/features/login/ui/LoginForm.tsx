@@ -47,6 +47,7 @@ export const LoginForm = () => {
         return
       }
 
+      router.refresh()
       router.replace('/')
     } catch {
       setError('root.server', {
