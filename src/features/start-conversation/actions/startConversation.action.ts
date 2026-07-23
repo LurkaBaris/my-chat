@@ -8,6 +8,8 @@ import { createDirectConversationKey } from '../lib/createDirectConversationKey'
 import { startConversationSchema } from '../model/startConversationSchema'
 import type { DirectConversationResult, StartConversationResult } from '../model/types'
 
+const START_CONVERSATION_ERROR_MESSAGE = 'Не удалось создать чат'
+
 async function findExistingDirectConversation(
   database: Pick<Prisma.TransactionClient, 'conversation'>,
   directKey: string,
@@ -96,28 +98,21 @@ export async function startConversationByEmail(data: unknown): Promise<StartConv
     if (!otherUser) {
       return {
         success: false,
-        message: 'Не удалось найти пользователя с таким email',
+        message: START_CONVERSATION_ERROR_MESSAGE,
       }
     }
 
     if (session.user.id === otherUser.id) {
-      return { success: false, message: 'Нельзя создать чат с самим собой' }
+      return { success: false, message: START_CONVERSATION_ERROR_MESSAGE }
     }
 
     const conversation = await findOrCreateDirectConversation(session.user.id, otherUser.id)
 
     return { success: true, conversationId: conversation.conversationId }
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return {
-        success: false,
-        message: 'Ошибка базы данных при создании чата',
-      }
-    }
-
+  } catch {
     return {
       success: false,
-      message: 'Не удалось создать чат',
+      message: START_CONVERSATION_ERROR_MESSAGE,
     }
   }
 }
