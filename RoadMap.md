@@ -6,7 +6,7 @@
 Next.js (App Router, Server Actions)
 Auth.js v5 (next-auth@beta) — Credentials provider, свой bcrypt-хэш, JWT-сессии
 PostgreSQL + Prisma (adapter @auth/prisma-adapter)
-Доставка сообщений: server actions (этап 2) → WebSocket / Socket.IO (этап 3)
+Доставка сообщений: server actions (этап 2) → SSE / EventSource (этап 3)
 ```
 
 ### Важные оговорки (прочитать до старта)
@@ -374,57 +374,49 @@ export const config = {
 
 ---
 
-## ЭТАП 3 — Realtime (WebSocket)
+## ЭТАП 3 — Realtime (SSE)
 
-Polling и SSE пропускаем: сразу двусторонний канал, как в «настоящем» чате.
+Polling и WebSocket пока пропускаем: для доставки «новое сообщение» достаточно одностороннего потока сервер → клиент. Отправка остаётся через `sendMessage`.
 
-### Задача 3.1 — Доставка сообщений через WebSocket (Socket.IO)
+### Задача 3.1 — Мгновенная доставка сообщений через SSE
 
-**Контекст:** App Router сам по себе не поднимает долгоживущий WS. Нужен кастомный Node-сервер рядом с Next (или `server.ts` + Socket.IO). Источник истины по-прежнему Postgres + `sendMessage`; сокет только доставляет событие онлайн-клиентам.
+**Контекст:** SSE (Server-Sent Events) — браузерный API `EventSource`. Клиент подписывается на URL, сервер шлёт события. Источник истины — Postgres; SSE только уведомляет онлайн-клиентов.
 
 **Что сделать:**
 
-- Поднять Socket.IO на том же origin в dev: например `server.ts` + `socket.io`, скрипт запуска в `package.json` (не обычный `next dev` в одиночку). Документировать в README.
-- На `connection`:
-  - достать сессию (cookie Auth.js) и понять `userId`; без сессии — `disconnect`;
-  - клиент шлёт `joinConversation({ conversationId })` → сервер проверяет membership в БД → `socket.join(conversationId)` либо ошибка.
-- После успешного `sendMessage` (server action **или** сокет-событие — на выбор, но запись в БД обязательна **до** emit):
-  - `io.to(conversationId).emit('message:new', payload)` без лишних полей и без `passwordHash`.
-- Клиент на `/chat/[conversationId]`:
-  - подключается к сокету, делает `joinConversation`;
-  - слушает `message:new`, добавляет в ленту **без дублей** (по `id`);
-  - на `unmount` / смене чата — `leaveConversation` + cleanup слушателей.
-- После reconnect снова `join` текущей беседы (Socket.IO переподключается сам — нужно лишь повторить join).
+- Route Handler `GET /api/chat/[conversationId]/stream` с `Content-Type: text/event-stream`.
+- При подключении: `auth()` + проверка, что юзер — участник беседы; иначе `401`/`403`.
+- После успешного `sendMessage` — опубликовать событие подписчикам этой беседы (простой in-memory pub/sub на один процесс dev-сервера достаточно).
+- На клиенте в открытом `/chat/[conversationId]`: `new EventSource(...)`, парсить `message`/`data`, добавлять в ленту **без дублей** (по `id`).
+- Свои исходящие не дублировать (optimistic UI + reconcile по `id`, либо игнорировать событие, если сообщение уже есть локально).
 - Автоскролл вниз только если пользователь был у низа ленты.
-- README: зачем WebSocket; чем отличается от polling/SSE; что in-memory adapter = один процесс (Redis adapter — вне scope).
+- На `unmount` / смене `conversationId` — `eventSource.close()`; на сервере отписать клиента от канала (cleanup стрима).
+- README: зачем SSE; чем отличается от polling и WebSocket; лимит in-memory pub/sub (не шарится между инстансами).
 
 **Критерии приёмки:**
 
-- [ ] Сообщение второго участника появляется в открытом чате без F5
-- [ ] Неавторизованный сокет отключается; join в чужую беседу отклоняется
-- [ ] Сообщение сначала в БД, потом в сокет (после рестарта история читается из Postgres)
-- [ ] Нет дубликатов в ленте; leave/unmount чистит подписку
-- [ ] После краткого обрыва сети и reconnect новые сообщения снова приходят
-- [ ] README описывает запуск с Socket.IO и ограничение одного инстанса
+- [ ] Сообщение второго участника появляется в открытом чате без F5 и без polling
+- [ ] Неавторизованный / не-участник не получает поток (`401`/`403`)
+- [ ] Сообщение сначала в БД, потом в SSE-событие
+- [ ] Нет дубликатов в ленте
+- [ ] При уходе со страницы соединение закрывается
+- [ ] Скролл не мешает читать историю выше
+- [ ] В README есть короткое пояснение про SSE и лимит одного инстанса
 
-**Ориентир по событиям:**
+**Ориентир:**
 
 ```ts
-// клиент → сервер
-joinConversation: { conversationId: string }
-leaveConversation: { conversationId: string }
-
-// сервер → клиент
-message:new: {
-  id: string
-  conversationId: string
-  body: string
-  senderId: string
-  createdAt: string
-  sender: { id: string; name: string | null; email: string }
+// headers ответа
+{
+  'Content-Type': 'text/event-stream',
+  'Cache-Control': 'no-cache, no-transform',
+  Connection: 'keep-alive',
 }
+
+// событие в потоке
+data: {"id":"...","conversationId":"...","body":"...","senderId":"...","createdAt":"..."}\n\n
 ```
 
-**Важно:** не тащить бизнес-логику «только в сокет». Сохранение в Prisma — обязательный шаг; сокет — транспорт уведомления, не единственное хранилище.
+**Важно:** не хранить сообщения только в памяти подписчиков. Сначала Prisma, потом publish в SSE.
 
 ---
