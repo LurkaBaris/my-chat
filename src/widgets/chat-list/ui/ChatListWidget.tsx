@@ -8,10 +8,10 @@ import styles from './ChatListWidget.module.css'
 interface ChatListWidgetProps {
   activeChatId: string
   chats: MessagePreview[]
-  footer: ReactNode
+  children: ReactNode
 }
 
-export const ChatListWidget = ({ activeChatId, chats, footer }: ChatListWidgetProps) => {
+export const ChatListWidget = ({ activeChatId, chats, children }: ChatListWidgetProps) => {
   return (
     <aside className={styles.sidebar} id="chat-list-panel">
       <header className={styles.header}>
@@ -29,7 +29,7 @@ export const ChatListWidget = ({ activeChatId, chats, footer }: ChatListWidgetPr
         </Flex>
       </nav>
 
-      <footer className={styles.actions}>{footer}</footer>
+      <footer className={styles.actions}>{children}</footer>
     </aside>
   )
 }

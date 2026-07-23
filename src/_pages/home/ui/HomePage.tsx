@@ -1,5 +1,10 @@
 'use client'
 
+import { activeChat, chats, messages } from '@/entities/message'
+import type { AuthUser } from '@/shared/lib'
+import { ChatListWidget } from '@/widgets/chat-list'
+import { ChatMessagesWidget } from '@/widgets/chat-messages'
+import { Avatar } from 'antd'
 import clsx from 'clsx'
 import {
   useEffect,
@@ -9,20 +14,16 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react'
-
-import { ChatListWidget } from '@/widgets/chat-list'
-import { ChatMessagesWidget } from '@/widgets/chat-messages'
-import { activeChat, chats, messages } from '@/entities/message'
-
 import { clampSidebarWidth, type ResizeStart } from '../lib/sidebarResize'
 import { DEFAULT_SIDEBAR_WIDTH } from '../model/constants'
 import styles from './HomePage.module.css'
 
 interface HomePageProps {
   actions: ReactNode
+  authUser: AuthUser
 }
 
-export const HomePage = ({ actions }: HomePageProps) => {
+export const HomePage = ({ actions, authUser }: HomePageProps) => {
   const layoutRef = useRef<HTMLDivElement>(null)
   const resizeStartRef = useRef<ResizeStart | null>(null)
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH)
@@ -85,6 +86,9 @@ export const HomePage = ({ actions }: HomePageProps) => {
     return () => observer.disconnect()
   }, [])
 
+  const displayName = authUser.name?.trim() || authUser.email?.trim() || 'Пользователь'
+  const avatarLetter = displayName.charAt(0).toUpperCase()
+
   return (
     <main className={clsx(styles.page, isResizing && styles.pageResizing)}>
       <div
@@ -92,7 +96,23 @@ export const HomePage = ({ actions }: HomePageProps) => {
         ref={layoutRef}
         style={{ '--sidebar-width': `${sidebarWidth}px` } as CSSProperties}
       >
-        <ChatListWidget activeChatId={activeChat.id} chats={chats} footer={actions} />
+        <ChatListWidget activeChatId={activeChat.id} chats={chats}>
+          <div className={styles.userBar}>
+            <div className={styles.userProfile}>
+              <Avatar className={styles.userAvatar} size={32}>
+                {avatarLetter}
+              </Avatar>
+
+              <div className={styles.userMeta}>
+                <p className={styles.userName}>{authUser.name || 'Пользователь'}</p>
+
+                {authUser.email && <p className={styles.userEmail}>{authUser.email}</p>}
+              </div>
+            </div>
+
+            <div className={styles.userActions}>{actions}</div>
+          </div>
+        </ChatListWidget>
 
         <button
           className={clsx(styles.resizeHandle, isResizing && styles.resizeHandleActive)}
