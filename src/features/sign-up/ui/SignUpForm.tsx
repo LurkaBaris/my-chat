@@ -67,7 +67,7 @@ export const SignUpForm = () => {
       title: 'Регистрация завершена',
       description: 'Вы успешно вошли в аккаунт',
     })
-    router.replace('/')
+    router.replace('/chat')
     reset()
   }
 

@@ -62,9 +62,16 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
 model Conversation {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+  id        String           @id @default(cuid())
+  type      ConversationType @default(DIRECT)
+  title     String?
+  createdAt DateTime         @default(now())
 
   participants ConversationParticipant[]
   messages     Message[]

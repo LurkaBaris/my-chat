@@ -9,6 +9,7 @@
   gap: 12px;
   color: inherit;
   text-align: left;
+  text-decoration: none;
   white-space: normal;
   cursor: pointer;
   background: transparent;
@@ -83,16 +84,4 @@
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .item {
-    transition: none;
-  }
-}
-
-@media (max-width: 767px) {
-  .item {
-    margin-inline: 10px;
-  }
 }

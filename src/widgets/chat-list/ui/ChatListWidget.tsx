@@ -1,17 +1,21 @@
+'use client'
+
 import { Flex } from 'antd'
+import { useParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 
-import { MessageListItem, type MessagePreview } from '@/entities/message'
+import { ConversationListItem, type ConversationPreview } from '@/entities/conversation'
 
 import styles from './ChatListWidget.module.css'
 
 interface ChatListWidgetProps {
-  activeChatId: string
-  chats: MessagePreview[]
   children: ReactNode
+  conversations: ConversationPreview[]
 }
 
-export const ChatListWidget = ({ activeChatId, chats, children }: ChatListWidgetProps) => {
+export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps) => {
+  const { conversationId } = useParams<{ conversationId?: string }>()
+
   return (
     <aside className={styles.sidebar} id="chat-list-panel">
       <header className={styles.header}>
@@ -21,9 +25,13 @@ export const ChatListWidget = ({ activeChatId, chats, children }: ChatListWidget
 
       <nav className={styles.content}>
         <Flex className={styles.chatList} vertical>
-          {chats.map((chat) => {
+          {conversations.map((conversation) => {
             return (
-              <MessageListItem isActive={chat.id === activeChatId} key={chat.id} message={chat} />
+              <ConversationListItem
+                conversation={conversation}
+                isActive={conversation.id === conversationId}
+                key={conversation.id}
+              />
             )
           })}
         </Flex>

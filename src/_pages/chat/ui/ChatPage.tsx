@@ -1,9 +1,9 @@
 'use client'
 
-import { activeChat, chats, messages } from '@/entities/message'
+import type { ConversationPreview } from '@/entities/conversation'
+import { StartConversationButton } from '@/features/start-conversation'
 import type { AuthUser } from '@/shared/lib'
 import { ChatListWidget } from '@/widgets/chat-list'
-import { ChatMessagesWidget } from '@/widgets/chat-messages'
 import { Avatar } from 'antd'
 import clsx from 'clsx'
 import {
@@ -16,14 +16,16 @@ import {
 } from 'react'
 import { clampSidebarWidth, type ResizeStart } from '../lib/sidebarResize'
 import { DEFAULT_SIDEBAR_WIDTH } from '../model/constants'
-import styles from './HomePage.module.css'
+import styles from './ChatPage.module.css'
 
-interface HomePageProps {
+interface ChatPageProps {
   actions: ReactNode
   authUser: AuthUser
+  children: ReactNode
+  conversations: ConversationPreview[]
 }
 
-export const HomePage = ({ actions, authUser }: HomePageProps) => {
+export const ChatPage = ({ actions, authUser, children, conversations }: ChatPageProps) => {
   const layoutRef = useRef<HTMLDivElement>(null)
   const resizeStartRef = useRef<ResizeStart | null>(null)
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH)
@@ -96,7 +98,8 @@ export const HomePage = ({ actions, authUser }: HomePageProps) => {
         ref={layoutRef}
         style={{ '--sidebar-width': `${sidebarWidth}px` } as CSSProperties}
       >
-        <ChatListWidget activeChatId={activeChat.id} chats={chats}>
+        <ChatListWidget conversations={conversations}>
+          <StartConversationButton />
           <div className={styles.userBar}>
             <div className={styles.userProfile}>
               <Avatar className={styles.userAvatar} size={32}>
@@ -125,7 +128,7 @@ export const HomePage = ({ actions, authUser }: HomePageProps) => {
           type="button"
         />
 
-        <ChatMessagesWidget chat={activeChat} messages={messages} />
+        {children}
       </div>
     </main>
   )
