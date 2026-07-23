@@ -7,3 +7,7 @@ export type StartConversationResult =
       success: false
       message: string
     }
+
+export interface DirectConversationResult {
+  conversationId: string
+}
