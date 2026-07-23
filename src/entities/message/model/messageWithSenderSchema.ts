@@ -1,16 +1,16 @@
 import { z } from 'zod'
 
-import type { SerializedMessageWithSender } from './types'
+import type { MessageWithSender } from './types'
 
-export const serializedMessageWithSenderSchema = z.object({
+export const messageWithSenderSchema = z.object({
   id: z.string(),
   conversationId: z.string(),
   senderId: z.string(),
   body: z.string(),
-  createdAt: z.iso.datetime(),
+  createdAt: z.coerce.date(),
   sender: z.object({
     id: z.string(),
     email: z.string(),
     name: z.string().nullable(),
   }),
-}) satisfies z.ZodType<SerializedMessageWithSender>
+}) satisfies z.ZodType<MessageWithSender>

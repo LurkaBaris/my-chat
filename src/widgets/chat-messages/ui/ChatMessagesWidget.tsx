@@ -1,11 +1,7 @@
 'use client'
 
 import type { ConversationDetails } from '@/entities/conversation'
-import {
-  ChatMessageItem,
-  serializedMessageWithSenderSchema,
-  type MessageWithSender,
-} from '@/entities/message'
+import { ChatMessageItem, parseMessageWithSender, type MessageWithSender } from '@/entities/message'
 import { MessageComposer } from '@/features/send-message'
 import { App, Avatar, Button, Flex } from 'antd'
 import { ArrowDown } from 'lucide-react'
@@ -93,21 +89,14 @@ export const ChatMessagesWidget = ({
     const eventSource = new EventSource(`/api/chat/${conversation.id}/stream`)
 
     eventSource.onmessage = (event) => {
-      try {
-        const result = serializedMessageWithSenderSchema.safeParse(JSON.parse(event.data))
+      const message = parseMessageWithSender(event.data)
 
-        if (!result.success) {
-          showMessageError()
-          return
-        }
-
-        addMessage({
-          ...result.data,
-          createdAt: new Date(result.data.createdAt),
-        })
-      } catch {
+      if (!message) {
         showMessageError()
+        return
       }
+
+      addMessage(message)
     }
 
     return () => {

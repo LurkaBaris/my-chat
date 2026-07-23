@@ -15,3 +15,13 @@ export interface ConversationPreview extends PublicConversation {
 export interface ConversationDetails extends PublicConversation {
   displayTitle: string
 }
+
+export type ChatListEvent =
+  | {
+      type: 'message.created'
+      message: MessageWithSender
+    }
+  | {
+      type: 'conversation.created'
+      conversation: ConversationPreview
+    }

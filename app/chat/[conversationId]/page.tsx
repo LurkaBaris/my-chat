@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 
-import { getConversation } from '@/entities/conversation/index.server'
+import { getConversationPreview } from '@/entities/conversation/index.server'
 import { getMessages } from '@/entities/message/index.server'
 import { isAuthUser } from '@/shared/lib'
 import { auth } from '@/shared/lib/index.server'
@@ -26,7 +26,7 @@ export default async function ConversationRoute({ params }: ConversationRoutePro
   const { conversationId } = await params
   const currentUserId = session.user.id
   const [conversation, messages] = await Promise.all([
-    getConversation(conversationId, currentUserId),
+    getConversationPreview(conversationId, currentUserId),
     getMessages(conversationId, currentUserId),
   ])
 

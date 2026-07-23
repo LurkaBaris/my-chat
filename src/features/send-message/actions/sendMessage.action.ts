@@ -1,6 +1,7 @@
 'use server'
 
-import { getConversationParticipant } from '@/entities/conversation-participant/index.server'
+import { getConversationParticipantUserIds } from '@/entities/conversation-participant/index.server'
+import { publishChatListEventToUsers } from '@/entities/conversation/index.server'
 import { publishToConversation } from '@/entities/message/index.server'
 import { prisma } from '@/shared/db/index.server'
 import { isAuthUser } from '@/shared/lib'
@@ -31,9 +32,9 @@ export async function sendMessage(
   const data = messageResult.data
 
   try {
-    const participant = await getConversationParticipant(data.conversationId, session.user.id)
+    const participantUserIds = await getConversationParticipantUserIds(data.conversationId)
 
-    if (!participant) {
+    if (!participantUserIds.includes(session.user.id)) {
       return {
         success: false,
         message: 'Нет доступа к этой беседе',
@@ -58,6 +59,10 @@ export async function sendMessage(
     })
 
     publishToConversation(message.conversationId, message)
+    publishChatListEventToUsers(participantUserIds, {
+      type: 'message.created',
+      message,
+    })
 
     return {
       success: true,

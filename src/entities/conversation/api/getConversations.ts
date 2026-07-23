@@ -3,7 +3,7 @@ import 'server-only'
 import { prisma } from '@/shared/db/index.server'
 import { formatConversationTime } from '../lib/formatConversationTime'
 import { getConversationDisplayTitle } from '../lib/getConversationDisplayTitle'
-import type { ConversationDetails, ConversationPreview } from '../model/types'
+import type { ConversationPreview } from '../model/types'
 
 export const getConversations = async (currentUserId: string): Promise<ConversationPreview[]> => {
   const conversations = await prisma.conversation.findMany({
@@ -52,8 +52,7 @@ export const getConversations = async (currentUserId: string): Promise<Conversat
       return secondActivityAt.getTime() - firstActivityAt.getTime()
     })
     .map((conversation) => {
-      const lastMessage = conversation.messages[0]
-      const activityAt = lastMessage?.createdAt ?? conversation.createdAt
+      const lastMessage = conversation.messages[0] ?? null
 
       return {
         id: conversation.id,
@@ -61,16 +60,16 @@ export const getConversations = async (currentUserId: string): Promise<Conversat
         title: conversation.title,
         createdAt: conversation.createdAt,
         displayTitle: getConversationDisplayTitle(conversation, currentUserId),
-        lastMessage: lastMessage ?? null,
-        time: formatConversationTime(activityAt),
+        lastMessage,
+        time: formatConversationTime(lastMessage?.createdAt ?? conversation.createdAt),
       }
     })
 }
 
-export const getConversation = async (
+export const getConversationPreview = async (
   conversationId: string,
   currentUserId: string,
-): Promise<ConversationDetails | null> => {
+): Promise<ConversationPreview | null> => {
   const conversation = await prisma.conversation.findFirst({
     where: {
       id: conversationId,
@@ -78,7 +77,11 @@ export const getConversation = async (
         some: { userId: currentUserId },
       },
     },
-    include: {
+    select: {
+      id: true,
+      type: true,
+      title: true,
+      createdAt: true,
       participants: {
         select: {
           userId: true,
@@ -90,10 +93,25 @@ export const getConversation = async (
           },
         },
       },
+      messages: {
+        orderBy: { createdAt: 'desc' },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+        },
+        take: 1,
+      },
     },
   })
 
   if (!conversation) return null
+
+  const lastMessage = conversation.messages[0] ?? null
 
   return {
     id: conversation.id,
@@ -101,5 +119,7 @@ export const getConversation = async (
     title: conversation.title,
     createdAt: conversation.createdAt,
     displayTitle: getConversationDisplayTitle(conversation, currentUserId),
+    lastMessage,
+    time: formatConversationTime(lastMessage?.createdAt ?? conversation.createdAt),
   }
 }
