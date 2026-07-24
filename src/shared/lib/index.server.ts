@@ -1,1 +1,1 @@
-export { auth, handlers, signIn, signOut } from './auth/index.server'
+export { auth, handlers, signIn, signOut } from './auth/index.server';

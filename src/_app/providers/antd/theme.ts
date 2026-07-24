@@ -1,4 +1,4 @@
-import type { ThemeConfig } from 'antd'
+import type { ThemeConfig } from 'antd';
 
 const primary = [
   '#f0fdfa',
@@ -11,7 +11,7 @@ const primary = [
   '#0f766e',
   '#115e59',
   '#134e4a',
-]
+];
 
 const secondary = [
   '#fff7ed',
@@ -24,7 +24,7 @@ const secondary = [
   '#c2410c',
   '#9a3412',
   '#7c2d12',
-]
+];
 
 const danger = [
   '#fef2f2',
@@ -37,7 +37,7 @@ const danger = [
   '#b91c1c',
   '#991b1b',
   '#7f1d1d',
-]
+];
 
 export const antdTheme = {
   cssVar: {
@@ -123,4 +123,4 @@ export const antdTheme = {
       width: 340,
     },
   },
-} satisfies ThemeConfig
+} satisfies ThemeConfig;

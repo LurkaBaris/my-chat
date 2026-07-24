@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
 import {
   ConversationListItem,
   formatConversationTime,
   parseChatListEvent,
   type ConversationPreview,
-} from '@/entities/conversation'
-import { App, Flex } from 'antd'
-import { useParams } from 'next/navigation'
-import { useEffect, useState, type ReactNode } from 'react'
+} from '@/entities/conversation';
+import { App, Flex } from 'antd';
+import { useParams } from 'next/navigation';
+import { useEffect, useState, type ReactNode } from 'react';
 
-import { ChatListEmptyState } from './ChatListEmptyState'
-import styles from './ChatListWidget.module.css'
+import { ChatListEmptyState } from './ChatListEmptyState';
+import styles from './ChatListWidget.module.css';
 
 interface ChatListWidgetProps {
-  children: ReactNode
-  conversations: ConversationPreview[]
+  children: ReactNode;
+  conversations: ConversationPreview[];
 }
 
 export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps) => {
-  const { conversationId } = useParams<{ conversationId?: string }>()
-  const { notification } = App.useApp()
-  const [liveConversations, setLiveConversations] = useState(conversations)
+  const { conversationId } = useParams<{ conversationId?: string }>();
+  const { notification } = App.useApp();
+  const [liveConversations, setLiveConversations] = useState(conversations);
 
   useEffect(() => {
-    const eventSource = new EventSource('/api/chat/stream')
+    const eventSource = new EventSource('/api/chat/stream');
 
     eventSource.onmessage = (event) => {
-      const chatListEvent = parseChatListEvent(event.data)
+      const chatListEvent = parseChatListEvent(event.data);
 
       if (!chatListEvent) {
         notification.error({
@@ -35,8 +35,8 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
           description: 'Не удалось обработать новое событие. Обновите страницу.',
           key: 'realtime-chat-list-error',
           placement: 'topRight',
-        })
-        return
+        });
+        return;
       }
 
       setLiveConversations((currentConversations) => {
@@ -46,15 +46,15 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
             ...currentConversations.filter(
               (conversation) => conversation.id !== chatListEvent.conversation.id,
             ),
-          ]
+          ];
         }
 
         const conversation = currentConversations.find(
           (conversation) => conversation.id === chatListEvent.message.conversationId,
-        )
+        );
 
         if (!conversation || conversation.lastMessage?.id === chatListEvent.message.id) {
-          return currentConversations
+          return currentConversations;
         }
 
         return [
@@ -66,12 +66,12 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
           ...currentConversations.filter(
             (currentConversation) => currentConversation.id !== conversation.id,
           ),
-        ]
-      })
-    }
+        ];
+      });
+    };
 
-    return () => eventSource.close()
-  }, [notification])
+    return () => eventSource.close();
+  }, [notification]);
 
   return (
     <aside className={styles.sidebar} id="chat-list-panel">
@@ -92,7 +92,7 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
                   isActive={conversation.id === conversationId}
                   key={conversation.id}
                 />
-              )
+              );
             })}
           </Flex>
         )}
@@ -100,5 +100,5 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
 
       <footer className={styles.actions}>{children}</footer>
     </aside>
-  )
-}
+  );
+};

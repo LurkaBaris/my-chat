@@ -1,7 +1,7 @@
-import { messageWithSenderSchema } from '@/entities/message'
-import { z } from 'zod'
+import { messageWithSenderSchema } from '@/entities/message';
+import { z } from 'zod';
 
-import type { ChatListEvent, ConversationPreview } from './types'
+import type { ChatListEvent, ConversationPreview } from './types';
 
 const conversationPreviewSchema = z.object({
   id: z.string(),
@@ -11,7 +11,7 @@ const conversationPreviewSchema = z.object({
   displayTitle: z.string(),
   lastMessage: messageWithSenderSchema.nullable(),
   time: z.string(),
-}) satisfies z.ZodType<ConversationPreview>
+}) satisfies z.ZodType<ConversationPreview>;
 
 export const chatListEventSchema = z.discriminatedUnion('type', [
   z.object({
@@ -22,4 +22,4 @@ export const chatListEventSchema = z.discriminatedUnion('type', [
     type: z.literal('conversation.created'),
     conversation: conversationPreviewSchema,
   }),
-]) satisfies z.ZodType<ChatListEvent>
+]) satisfies z.ZodType<ChatListEvent>;

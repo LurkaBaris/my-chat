@@ -1,8 +1,8 @@
-import 'server-only'
+import 'server-only';
 
-import { prisma } from '@/shared/db/index.server'
+import { prisma } from '@/shared/db/index.server';
 
-import type { MessageWithSender } from '../model/types'
+import type { MessageWithSender } from '../model/types';
 
 export const getMessages = async (
   conversationId: string,
@@ -16,9 +16,9 @@ export const getMessages = async (
       },
     },
     select: { id: true },
-  })
+  });
 
-  if (!participant) return null
+  if (!participant) return null;
 
   const messages = await prisma.message.findMany({
     where: { conversationId },
@@ -32,7 +32,7 @@ export const getMessages = async (
       },
     },
     orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
-  })
+  });
 
-  return messages
-}
+  return messages;
+};

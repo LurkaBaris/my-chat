@@ -1,10 +1,10 @@
-import { AppAntdProvider } from '@/_app/providers/antd'
-import '@/_app/styles/globals.css'
-import { AntdRegistry } from '@ant-design/nextjs-registry'
-import 'antd/dist/reset.css'
-import type { Metadata } from 'next'
-import 'normalize.css'
-import { PropsWithChildren } from 'react'
+import { AppAntdProvider } from '@/_app/providers/antd';
+import '@/_app/styles/globals.css';
+import { AntdRegistry } from '@ant-design/nextjs-registry';
+import 'antd/dist/reset.css';
+import type { Metadata } from 'next';
+import 'normalize.css';
+import { PropsWithChildren } from 'react';
 
 export const metadata: Metadata = {
   title: 'Главная | My Chat',
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
-}
+};
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
@@ -23,5 +23,5 @@ export default function RootLayout({ children }: PropsWithChildren) {
         </AntdRegistry>
       </body>
     </html>
-  )
+  );
 }

@@ -1,1 +1,1 @@
-export { credentialsSchema, isAuthUser, type AuthUser, type CredentialsSchemaType } from './auth'
+export { credentialsSchema, isAuthUser, type AuthUser, type CredentialsSchemaType } from './auth';

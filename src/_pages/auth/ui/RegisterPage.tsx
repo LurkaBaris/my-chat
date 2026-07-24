@@ -1,9 +1,9 @@
-import Link from 'next/link'
+import Link from 'next/link';
 
-import { SignUpForm } from '@/features/sign-up'
-import { CustomCard } from '@/shared/ui/card'
+import { SignUpForm } from '@/features/sign-up';
+import { CustomCard } from '@/shared/ui/card';
 
-import styles from './AuthPage.module.css'
+import styles from './AuthPage.module.css';
 
 export const RegisterPage = () => {
   return (
@@ -20,5 +20,5 @@ export const RegisterPage = () => {
         <SignUpForm />
       </CustomCard>
     </main>
-  )
-}
+  );
+};

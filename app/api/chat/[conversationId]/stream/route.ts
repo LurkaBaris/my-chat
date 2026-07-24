@@ -1,50 +1,50 @@
-import { getConversationParticipant } from '@/entities/conversation-participant/index.server'
-import { subscribeToConversation } from '@/entities/message/index.server'
-import { isAuthUser } from '@/shared/lib'
-import { auth } from '@/shared/lib/index.server'
+import { getConversationParticipant } from '@/entities/conversation-participant/index.server';
+import { subscribeToConversation } from '@/entities/message/index.server';
+import { isAuthUser } from '@/shared/lib';
+import { auth } from '@/shared/lib/index.server';
 
 interface StreamRouteContext {
-  params: Promise<{ conversationId: string }>
+  params: Promise<{ conversationId: string }>;
 }
 
 export const GET = async (request: Request, { params }: StreamRouteContext) => {
-  const session = await auth()
+  const session = await auth();
 
   if (!isAuthUser(session?.user)) {
-    return new Response(null, { status: 401 })
+    return new Response(null, { status: 401 });
   }
 
-  const { conversationId } = await params
+  const { conversationId } = await params;
 
-  const participant = await getConversationParticipant(conversationId, session.user.id)
+  const participant = await getConversationParticipant(conversationId, session.user.id);
 
   if (!participant) {
-    return new Response(null, { status: 403 })
+    return new Response(null, { status: 403 });
   }
 
-  const encoder = new TextEncoder()
-  let unsubscribe = () => {}
+  const encoder = new TextEncoder();
+  let unsubscribe = () => {};
 
   const stream = new ReadableStream({
     start: (controller) => {
       unsubscribe = subscribeToConversation(conversationId, (message) => {
-        const data = JSON.stringify(message)
-        const event = `data: ${data}\n\n`
+        const data = JSON.stringify(message);
+        const event = `data: ${data}\n\n`;
 
-        controller.enqueue(encoder.encode(event))
-      })
+        controller.enqueue(encoder.encode(event));
+      });
 
-      request.signal.addEventListener('abort', unsubscribe, { once: true })
+      request.signal.addEventListener('abort', unsubscribe, { once: true });
 
-      controller.enqueue(encoder.encode(': connected\n\n'))
+      controller.enqueue(encoder.encode(': connected\n\n'));
     },
 
     cancel: () => {
-      request.signal.removeEventListener('abort', unsubscribe)
+      request.signal.removeEventListener('abort', unsubscribe);
 
-      unsubscribe()
+      unsubscribe();
     },
-  })
+  });
 
   return new Response(stream, {
     headers: {
@@ -52,5 +52,5 @@ export const GET = async (request: Request, { params }: StreamRouteContext) => {
       'Cache-Control': 'no-cache, no-transform',
       Connection: 'keep-alive',
     },
-  })
-}
+  });
+};

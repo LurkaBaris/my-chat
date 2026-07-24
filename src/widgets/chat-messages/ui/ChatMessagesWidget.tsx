@@ -1,19 +1,23 @@
-'use client'
+'use client';
 
-import type { ConversationDetails } from '@/entities/conversation'
-import { ChatMessageItem, parseMessageWithSender, type MessageWithSender } from '@/entities/message'
-import { MessageComposer } from '@/features/send-message'
-import { App, Avatar, Button, Flex } from 'antd'
-import { ArrowDown } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import styles from './ChatMessagesWidget.module.css'
+import type { ConversationDetails } from '@/entities/conversation';
+import {
+  ChatMessageItem,
+  parseMessageWithSender,
+  type MessageWithSender,
+} from '@/entities/message';
+import { MessageComposer } from '@/features/send-message';
+import { App, Avatar, Button, Flex } from 'antd';
+import { ArrowDown } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import styles from './ChatMessagesWidget.module.css';
 
-const BOTTOM_THRESHOLD = 80
+const BOTTOM_THRESHOLD = 80;
 
 interface ChatMessagesWidgetProps {
-  conversation: ConversationDetails
-  currentUserId: string
-  messages: MessageWithSender[]
+  conversation: ConversationDetails;
+  currentUserId: string;
+  messages: MessageWithSender[];
 }
 
 export const ChatMessagesWidget = ({
@@ -21,60 +25,60 @@ export const ChatMessagesWidget = ({
   currentUserId,
   messages,
 }: ChatMessagesWidgetProps) => {
-  const messagesRef = useRef<HTMLDivElement>(null)
-  const isNearBottomRef = useRef(true)
-  const isInitialScrollRef = useRef(true)
-  const { notification } = App.useApp()
-  const [liveMessages, setLiveMessages] = useState(messages)
-  const [isScrollButtonVisible, setIsScrollButtonVisible] = useState(false)
-  const latestMessageId = liveMessages[liveMessages.length - 1]?.id
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const isNearBottomRef = useRef(true);
+  const isInitialScrollRef = useRef(true);
+  const { notification } = App.useApp();
+  const [liveMessages, setLiveMessages] = useState(messages);
+  const [isScrollButtonVisible, setIsScrollButtonVisible] = useState(false);
+  const latestMessageId = liveMessages[liveMessages.length - 1]?.id;
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
-    const messagesContainer = messagesRef.current
+    const messagesContainer = messagesRef.current;
 
-    if (!messagesContainer) return
+    if (!messagesContainer) return;
 
     messagesContainer.scrollTo({
       top: messagesContainer.scrollHeight,
       behavior,
-    })
-  }, [])
+    });
+  }, []);
 
   const handleMessagesScroll = () => {
-    const messagesContainer = messagesRef.current
+    const messagesContainer = messagesRef.current;
 
-    if (!messagesContainer) return
+    if (!messagesContainer) return;
 
     const distanceToBottom =
-      messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight
-    const isNearBottom = distanceToBottom <= BOTTOM_THRESHOLD
+      messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
+    const isNearBottom = distanceToBottom <= BOTTOM_THRESHOLD;
 
-    isNearBottomRef.current = isNearBottom
+    isNearBottomRef.current = isNearBottom;
 
     if (isNearBottom) {
-      setIsScrollButtonVisible(false)
+      setIsScrollButtonVisible(false);
     }
-  }
+  };
 
   const handleScrollToBottom = () => {
-    isNearBottomRef.current = true
-    setIsScrollButtonVisible(false)
-    scrollToBottom()
-  }
+    isNearBottomRef.current = true;
+    setIsScrollButtonVisible(false);
+    scrollToBottom();
+  };
 
   const addMessage = useCallback((message: MessageWithSender) => {
     setLiveMessages((currentMessages) => {
       const messageAlreadyExists = currentMessages.some(
         (currentMessage) => currentMessage.id === message.id,
-      )
+      );
 
       if (messageAlreadyExists) {
-        return currentMessages
+        return currentMessages;
       }
 
-      return [...currentMessages, message]
-    })
-  }, [])
+      return [...currentMessages, message];
+    });
+  }, []);
 
   const showMessageError = useCallback(() => {
     notification.error({
@@ -82,41 +86,41 @@ export const ChatMessagesWidget = ({
       description: 'Не удалось обработать новое сообщение. Обновите страницу.',
       key: 'realtime-message-error',
       placement: 'topRight',
-    })
-  }, [notification])
+    });
+  }, [notification]);
 
   useEffect(() => {
-    const eventSource = new EventSource(`/api/chat/${conversation.id}/stream`)
+    const eventSource = new EventSource(`/api/chat/${conversation.id}/stream`);
 
     eventSource.onmessage = (event) => {
-      const message = parseMessageWithSender(event.data)
+      const message = parseMessageWithSender(event.data);
 
       if (!message) {
-        showMessageError()
-        return
+        showMessageError();
+        return;
       }
 
-      addMessage(message)
-    }
+      addMessage(message);
+    };
 
     return () => {
-      eventSource.close()
-    }
-  }, [addMessage, conversation.id, showMessageError])
+      eventSource.close();
+    };
+  }, [addMessage, conversation.id, showMessageError]);
 
   useEffect(() => {
-    if (!latestMessageId) return
+    if (!latestMessageId) return;
 
     if (!isNearBottomRef.current) {
-      setIsScrollButtonVisible(true)
-      return
+      setIsScrollButtonVisible(true);
+      return;
     }
 
-    scrollToBottom(isInitialScrollRef.current ? 'auto' : 'smooth')
+    scrollToBottom(isInitialScrollRef.current ? 'auto' : 'smooth');
 
-    isInitialScrollRef.current = false
-    setIsScrollButtonVisible(false)
-  }, [latestMessageId, scrollToBottom])
+    isInitialScrollRef.current = false;
+    setIsScrollButtonVisible(false);
+  }, [latestMessageId, scrollToBottom]);
 
   return (
     <section className={styles.chatPanel}>
@@ -153,5 +157,5 @@ export const ChatMessagesWidget = ({
 
       <MessageComposer conversationId={conversation.id} onMessageSent={addMessage} />
     </section>
-  )
-}
+  );
+};

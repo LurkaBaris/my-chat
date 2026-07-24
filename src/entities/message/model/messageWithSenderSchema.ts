@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
-import type { MessageWithSender } from './types'
+import type { MessageWithSender } from './types';
 
 export const messageWithSenderSchema = z.object({
   id: z.string(),
@@ -13,4 +13,4 @@ export const messageWithSenderSchema = z.object({
     email: z.string(),
     name: z.string().nullable(),
   }),
-}) satisfies z.ZodType<MessageWithSender>
+}) satisfies z.ZodType<MessageWithSender>;

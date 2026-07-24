@@ -1,13 +1,13 @@
-import { Avatar, Flex } from 'antd'
-import clsx from 'clsx'
-import Link from 'next/link'
+import { Avatar, Flex } from 'antd';
+import clsx from 'clsx';
+import Link from 'next/link';
 
-import type { ConversationPreview } from '../model/types'
-import styles from './ConversationListItem.module.css'
+import type { ConversationPreview } from '../model/types';
+import styles from './ConversationListItem.module.css';
 
 interface ConversationListItemProps {
-  conversation: ConversationPreview
-  isActive: boolean
+  conversation: ConversationPreview;
+  isActive: boolean;
 }
 
 export const ConversationListItem = ({ conversation, isActive }: ConversationListItemProps) => {
@@ -33,5 +33,5 @@ export const ConversationListItem = ({ conversation, isActive }: ConversationLis
         </span>
       </Flex>
     </Link>
-  )
-}
+  );
+};

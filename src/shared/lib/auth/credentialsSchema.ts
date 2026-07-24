@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const credentialsSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email('Некорректный email')),
@@ -9,6 +9,6 @@ export const credentialsSchema = z.object({
       (password) => new TextEncoder().encode(password).length <= 72,
       'Пароль должен занимать максимум 72 байта',
     ),
-})
+});
 
-export type CredentialsSchemaType = z.infer<typeof credentialsSchema>
+export type CredentialsSchemaType = z.infer<typeof credentialsSchema>;

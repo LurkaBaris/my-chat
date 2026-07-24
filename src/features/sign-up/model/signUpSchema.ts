@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const signUpSchema = z
   .object({
@@ -26,8 +26,8 @@ export const signUpSchema = z
         code: 'custom',
         path: ['confirmPassword'],
         message: 'Пароли не совпадают',
-      })
+      });
     }
-  })
+  });
 
-export type SignUpSchemaType = z.infer<typeof signUpSchema>
+export type SignUpSchemaType = z.infer<typeof signUpSchema>;

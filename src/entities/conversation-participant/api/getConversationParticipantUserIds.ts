@@ -1,6 +1,6 @@
-import 'server-only'
+import 'server-only';
 
-import { prisma } from '@/shared/db/index.server'
+import { prisma } from '@/shared/db/index.server';
 
 export const getConversationParticipantUserIds = async (
   conversationId: string,
@@ -12,7 +12,7 @@ export const getConversationParticipantUserIds = async (
     select: {
       userId: true,
     },
-  })
+  });
 
-  return participants.map((participant) => participant.userId)
-}
+  return participants.map((participant) => participant.userId);
+};
