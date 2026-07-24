@@ -4,12 +4,14 @@ import type { MessageWithSender } from '@/entities/message'
 
 export type Conversation = PrismaConversation
 
-export interface ConversationPreview extends Conversation {
+type PublicConversation = Omit<Conversation, 'directKey'>
+
+export interface ConversationPreview extends PublicConversation {
   displayTitle: string
   lastMessage: MessageWithSender | null
   time: string
 }
 
-export interface ConversationDetails extends Conversation {
+export interface ConversationDetails extends PublicConversation {
   displayTitle: string
 }

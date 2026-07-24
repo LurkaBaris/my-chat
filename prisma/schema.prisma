@@ -71,6 +71,7 @@ model Conversation {
   id        String           @id @default(cuid())
   type      ConversationType @default(DIRECT)
   title     String?
+  directKey String?          @unique
   createdAt DateTime         @default(now())
 
   participants ConversationParticipant[]

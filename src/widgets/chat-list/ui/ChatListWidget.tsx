@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 
 import { ConversationListItem, type ConversationPreview } from '@/entities/conversation'
 
+import { ChatListEmptyState } from './ChatListEmptyState'
 import styles from './ChatListWidget.module.css'
 
 interface ChatListWidgetProps {
@@ -24,17 +25,21 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
       </header>
 
       <nav className={styles.content}>
-        <Flex className={styles.chatList} vertical>
-          {conversations.map((conversation) => {
-            return (
-              <ConversationListItem
-                conversation={conversation}
-                isActive={conversation.id === conversationId}
-                key={conversation.id}
-              />
-            )
-          })}
-        </Flex>
+        {conversations.length === 0 ? (
+          <ChatListEmptyState />
+        ) : (
+          <Flex className={styles.chatList} vertical>
+            {conversations.map((conversation) => {
+              return (
+                <ConversationListItem
+                  conversation={conversation}
+                  isActive={conversation.id === conversationId}
+                  key={conversation.id}
+                />
+              )
+            })}
+          </Flex>
+        )}
       </nav>
 
       <footer className={styles.actions}>{children}</footer>
