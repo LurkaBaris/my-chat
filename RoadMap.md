@@ -492,12 +492,11 @@ data: {"id":"...","conversationId":"...","body":"...","senderId":"...","createdA
 
 ## Задачи со звездочкой
 
-- Деплой на timeweb / managed Postgres / публичный URL
+- Деплой на timeweb своего профиля с резюме + pet projects
 - WebSocket / Socket.IO вместо SSE
 - OAuth (Google/GitHub)
 - Восстановление пароля, подтверждение email
 - Роли, админка, групповые чаты с правами
 - Загрузка файлов/картинок в сообщения
-- Redis adapter / multi-instance realtime
 
 ---
