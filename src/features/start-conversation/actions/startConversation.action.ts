@@ -1,5 +1,9 @@
 'use server'
 
+import {
+  getConversationPreview,
+  publishChatListEventToUsers,
+} from '@/entities/conversation/index.server'
 import { prisma } from '@/shared/db/index.server'
 import { isAuthUser } from '@/shared/lib'
 import { auth } from '@/shared/lib/index.server'
@@ -25,6 +29,7 @@ async function findExistingDirectConversation(
 
   return {
     conversationId: conversation.id,
+    isCreated: false,
   }
 }
 
@@ -56,6 +61,7 @@ async function findOrCreateDirectConversation(
 
       return {
         conversationId: conversation.id,
+        isCreated: true,
       }
     })
   } catch (error) {
@@ -108,7 +114,25 @@ export async function startConversationByEmail(data: unknown): Promise<StartConv
 
     const conversation = await findOrCreateDirectConversation(session.user.id, otherUser.id)
 
-    return { success: true, conversationId: conversation.conversationId }
+    if (conversation.isCreated) {
+      await Promise.allSettled(
+        [session.user.id, otherUser.id].map(async (userId) => {
+          const preview = await getConversationPreview(conversation.conversationId, userId)
+
+          if (!preview) return
+
+          publishChatListEventToUsers([userId], {
+            type: 'conversation.created',
+            conversation: preview,
+          })
+        }),
+      )
+    }
+
+    return {
+      success: true,
+      conversationId: conversation.conversationId,
+    }
   } catch {
     return {
       success: false,

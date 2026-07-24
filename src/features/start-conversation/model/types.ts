@@ -10,4 +10,5 @@ export type StartConversationResult =
 
 export interface DirectConversationResult {
   conversationId: string
+  isCreated: boolean
 }

@@ -1,10 +1,12 @@
 'use server'
 
+import { getConversationParticipantUserIds } from '@/entities/conversation-participant/index.server'
+import { publishChatListEventToUsers } from '@/entities/conversation/index.server'
+import { publishToConversation } from '@/entities/message/index.server'
 import { prisma } from '@/shared/db/index.server'
 import { isAuthUser } from '@/shared/lib'
 import { auth } from '@/shared/lib/index.server'
 import { Prisma } from '@prisma/client'
-import { refresh } from 'next/cache'
 import { sendMessageSchema } from '../model/sendMessageSchema'
 import type { SendMessageResult } from '../model/types'
 
@@ -30,18 +32,13 @@ export async function sendMessage(
   const data = messageResult.data
 
   try {
-    const participant = await prisma.conversationParticipant.findUnique({
-      where: {
-        conversationId_userId: {
-          conversationId: data.conversationId,
-          userId: session.user.id,
-        },
-      },
-      select: { id: true },
-    })
+    const participantUserIds = await getConversationParticipantUserIds(data.conversationId)
 
-    if (!participant) {
-      return { success: false, message: 'Нет доступа к этой беседе' }
+    if (!participantUserIds.includes(session.user.id)) {
+      return {
+        success: false,
+        message: 'Нет доступа к этой беседе',
+      }
     }
 
     const message = await prisma.message.create({
@@ -50,12 +47,27 @@ export async function sendMessage(
         senderId: session.user.id,
         body: data.body,
       },
-      select: { id: true },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
     })
 
-    refresh()
+    publishToConversation(message.conversationId, message)
+    publishChatListEventToUsers(participantUserIds, {
+      type: 'message.created',
+      message,
+    })
 
-    return { success: true, messageId: message.id }
+    return {
+      success: true,
+      message,
+    }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
       return { success: false, message: 'Беседа больше недоступна' }

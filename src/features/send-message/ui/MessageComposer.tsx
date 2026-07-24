@@ -13,12 +13,14 @@ import {
   type SendMessageSchemaType,
 } from '../model/sendMessageSchema'
 import styles from './MessageComposer.module.css'
+import type { MessageWithSender } from '@/entities/message'
 
 interface MessageComposerProps {
   conversationId: string
+  onMessageSent: (message: MessageWithSender) => void
 }
 
-export const MessageComposer = ({ conversationId }: MessageComposerProps) => {
+export const MessageComposer = ({ conversationId, onMessageSent }: MessageComposerProps) => {
   const { notification } = App.useApp()
   const {
     control,
@@ -54,6 +56,7 @@ export const MessageComposer = ({ conversationId }: MessageComposerProps) => {
         return
       }
 
+      onMessageSent(result.message)
       resetField('body')
     } catch {
       showError('Не удалось отправить сообщение')
