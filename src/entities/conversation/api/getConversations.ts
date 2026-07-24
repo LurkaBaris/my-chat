@@ -1,7 +1,8 @@
 import 'server-only';
 
 import { prisma } from '@/shared/db/index.server';
-import { formatConversationTime } from '../lib/formatConversationTime';
+import { formatChatDate } from '@/shared/lib';
+
 import { getConversationDisplayTitle } from '../lib/getConversationDisplayTitle';
 import type { ConversationPreview } from '../model/types';
 
@@ -82,7 +83,7 @@ export const getConversations = async (
         createdAt: conversation.createdAt,
         displayTitle: getConversationDisplayTitle(conversation, currentUserId),
         lastMessage,
-        time: formatConversationTime(lastMessage?.createdAt ?? conversation.createdAt),
+        time: formatChatDate(lastMessage?.createdAt ?? conversation.createdAt, 'preview'),
       };
     });
 };
@@ -141,6 +142,6 @@ export const getConversationPreview = async (
     createdAt: conversation.createdAt,
     displayTitle: getConversationDisplayTitle(conversation, currentUserId),
     lastMessage,
-    time: formatConversationTime(lastMessage?.createdAt ?? conversation.createdAt),
+    time: formatChatDate(lastMessage?.createdAt ?? conversation.createdAt, 'preview'),
   };
 };

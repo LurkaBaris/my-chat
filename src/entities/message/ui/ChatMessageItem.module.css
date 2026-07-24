@@ -34,3 +34,13 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+.time {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  opacity: 0.72;
+}

@@ -2,10 +2,10 @@
 
 import {
   ConversationListItem,
-  formatConversationTime,
   parseChatListEvent,
   type ConversationPreview,
 } from '@/entities/conversation';
+import { formatChatDate } from '@/shared/lib';
 import { useAppNotification } from '@/shared/ui';
 import { Flex } from 'antd';
 import { useParams } from 'next/navigation';
@@ -85,7 +85,7 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
           {
             ...conversation,
             lastMessage: chatListEvent.message,
-            time: formatConversationTime(chatListEvent.message.createdAt),
+            time: formatChatDate(chatListEvent.message.createdAt, 'preview'),
           },
           ...currentConversations.filter(
             (currentConversation) => currentConversation.id !== conversation.id,

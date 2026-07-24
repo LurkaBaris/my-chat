@@ -11,6 +11,8 @@ interface ConversationListItemProps {
 }
 
 export const ConversationListItem = ({ conversation, isActive }: ConversationListItemProps) => {
+  const activityAt = conversation.lastMessage?.createdAt ?? conversation.createdAt;
+
   return (
     <Link
       aria-current={isActive ? 'page' : undefined}
@@ -25,7 +27,9 @@ export const ConversationListItem = ({ conversation, isActive }: ConversationLis
       <Flex className={styles.preview} vertical>
         <Flex align="center" className={styles.info}>
           <span className={styles.name}>{conversation.displayTitle}</span>
-          <time className={styles.time}>{conversation.time}</time>
+          <time className={styles.time} dateTime={activityAt.toISOString()}>
+            {conversation.time}
+          </time>
         </Flex>
 
         <span className={styles.lastMessage}>
