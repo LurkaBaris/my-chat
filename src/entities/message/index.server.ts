@@ -1,2 +1,3 @@
-export { getMessages } from './api/getMessages'
-export { publishToConversation, subscribeToConversation } from './lib/messagePubSub'
+export { getMessages } from './api/getMessages';
+export { getMessagesAfter } from './api/getMessagesAfter';
+export { publishToConversation, subscribeToConversation } from './lib/messagePubSub';

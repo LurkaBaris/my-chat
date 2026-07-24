@@ -1,27 +1,37 @@
-import type { Conversation as PrismaConversation } from '@prisma/client'
+import type { Conversation as PrismaConversation, Prisma } from '@prisma/client';
 
-import type { MessageWithSender } from '@/entities/message'
+type MessageWithSender = Prisma.MessageGetPayload<{
+  include: {
+    sender: {
+      select: {
+        id: true;
+        email: true;
+        name: true;
+      };
+    };
+  };
+}>;
 
-export type Conversation = PrismaConversation
+export type Conversation = PrismaConversation;
 
-type PublicConversation = Omit<Conversation, 'directKey'>
+type PublicConversation = Omit<Conversation, 'directKey'>;
 
 export interface ConversationPreview extends PublicConversation {
-  displayTitle: string
-  lastMessage: MessageWithSender | null
-  time: string
+  displayTitle: string;
+  lastMessage: MessageWithSender | null;
+  time: string;
 }
 
 export interface ConversationDetails extends PublicConversation {
-  displayTitle: string
+  displayTitle: string;
 }
 
 export type ChatListEvent =
   | {
-      type: 'message.created'
-      message: MessageWithSender
+      type: 'message.created';
+      message: MessageWithSender;
     }
   | {
-      type: 'conversation.created'
-      conversation: ConversationPreview
-    }
+      type: 'conversation.created';
+      conversation: ConversationPreview;
+    };

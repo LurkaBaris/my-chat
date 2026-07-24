@@ -1,8 +1,8 @@
-import 'server-only'
+import 'server-only';
 
-import { prisma } from '@/shared/db/index.server'
+import { prisma } from '@/shared/db/index.server';
 
-import type { ConversationParticipant } from '../model/types'
+import type { ConversationParticipant } from '../model/types';
 
 export const getConversationParticipant = async (
   conversationId: string,
@@ -15,5 +15,5 @@ export const getConversationParticipant = async (
         userId,
       },
     },
-  })
-}
+  });
+};

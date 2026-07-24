@@ -11,11 +11,18 @@
   height: var(--chat-header-height);
   flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 0 20px;
   border-bottom: 1px solid var(--chat-color-border-secondary);
+}
+
+.headerText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .title {
@@ -34,6 +41,10 @@
   line-height: 1.4;
 }
 
+.closeButton.closeButton {
+  display: none;
+}
+
 .content {
   flex: 1;
   min-height: 0;
@@ -43,14 +54,42 @@
 
 .chatList {
   gap: 4px;
-  padding: 4px !important;
+  padding: 4px;
 }
 
 .emptyState {
   min-height: 100%;
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 24px 20px;
+}
+
+.emptyStateContent {
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+  color: var(--chat-color-primary);
+  background: var(--chat-color-primary-bg);
+  border: 1px solid var(--chat-color-primary-border);
+  border-radius: 16px;
+}
+
+.emptyStateTitle {
+  margin: 0 0 6px;
+  color: var(--chat-color-text);
+  font-size: 16px;
+  line-height: 1.35;
 }
 
 .emptyStateText {
@@ -70,4 +109,35 @@
   gap: 12px;
   padding: 12px 14px;
   border-top: 1px solid var(--chat-color-border-secondary);
+}
+
+@media (max-width: 767px) {
+  .header {
+    padding: 0 12px 0 16px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .closeButton.closeButton {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .content {
+    overscroll-behavior: contain;
+  }
+
+  .chatList {
+    padding: 6px;
+  }
+
+  .emptyState {
+    padding: 24px;
+  }
 }

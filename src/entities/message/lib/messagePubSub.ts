@@ -1,55 +1,55 @@
-import 'server-only'
+import 'server-only';
 
-import type { MessageWithSender } from '../model/types'
+import type { MessageWithSender } from '../model/types';
 
-type MessageSubscriber = (message: MessageWithSender) => void
+type MessageSubscriber = (message: MessageWithSender) => void;
 
 const globalForMessagePubSub = globalThis as unknown & {
-  messageChannels?: Map<string, Set<MessageSubscriber>>
-}
+  messageChannels?: Map<string, Set<MessageSubscriber>>;
+};
 
 const messageChannels =
-  globalForMessagePubSub.messageChannels ?? new Map<string, Set<MessageSubscriber>>()
+  globalForMessagePubSub.messageChannels ?? new Map<string, Set<MessageSubscriber>>();
 
-globalForMessagePubSub.messageChannels = messageChannels
+globalForMessagePubSub.messageChannels = messageChannels;
 
 export const subscribeToConversation = (conversationId: string, subscriber: MessageSubscriber) => {
-  let subscribers = messageChannels.get(conversationId)
+  let subscribers = messageChannels.get(conversationId);
 
   if (!subscribers) {
-    subscribers = new Set<MessageSubscriber>()
-    messageChannels.set(conversationId, subscribers)
+    subscribers = new Set<MessageSubscriber>();
+    messageChannels.set(conversationId, subscribers);
   }
 
-  subscribers.add(subscriber)
+  subscribers.add(subscriber);
 
   return () => {
-    const currentSubscribers = messageChannels.get(conversationId)
+    const currentSubscribers = messageChannels.get(conversationId);
 
-    if (!currentSubscribers) return
+    if (!currentSubscribers) return;
 
-    currentSubscribers.delete(subscriber)
+    currentSubscribers.delete(subscriber);
 
     if (currentSubscribers.size === 0) {
-      messageChannels.delete(conversationId)
+      messageChannels.delete(conversationId);
     }
-  }
-}
+  };
+};
 
 export const publishToConversation = (conversationId: string, message: MessageWithSender) => {
-  const subscribers = messageChannels.get(conversationId)
+  const subscribers = messageChannels.get(conversationId);
 
-  if (!subscribers) return
+  if (!subscribers) return;
 
   for (const subscriber of [...subscribers]) {
     try {
-      subscriber(message)
+      subscriber(message);
     } catch {
-      subscribers.delete(subscriber)
+      subscribers.delete(subscriber);
     }
   }
 
   if (subscribers.size === 0) {
-    messageChannels.delete(conversationId)
+    messageChannels.delete(conversationId);
   }
-}
+};

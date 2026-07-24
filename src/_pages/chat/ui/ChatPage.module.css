@@ -1,5 +1,6 @@
 .page {
   width: 100%;
+  height: 100vh;
   height: 100dvh;
   min-height: 0;
   overflow: hidden;
@@ -10,11 +11,19 @@
   --chat-header-height: 72px;
   --chat-footer-height: 64px;
 
+  position: relative;
   width: 100%;
   height: 100%;
   min-width: 0;
   display: grid;
   grid-template-columns: var(--sidebar-width) 8px minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--chat-color-bg-container);
+}
+
+.sidebarLayer {
+  min-width: 0;
+  height: 100%;
   overflow: hidden;
   background: var(--chat-color-bg-container);
 }
@@ -74,9 +83,9 @@
   overflow: hidden;
 }
 
-.userAvatar {
+.userAvatar.userAvatar {
   flex: 0 0 auto;
-  background: var(--chat-color-primary) !important;
+  background: var(--chat-color-primary);
 }
 
 .userMeta {
@@ -112,6 +121,11 @@
   flex: 0 0 auto;
 }
 
+.mobileMenuButton.mobileMenuButton,
+.sidebarBackdrop {
+  display: none;
+}
+
 .emptyState {
   min-width: 0;
   height: 100%;
@@ -121,9 +135,131 @@
   background: var(--chat-color-primary-bg);
 }
 
+.emptyStateContent {
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.emptyStateTitle {
+  margin: 0 0 6px;
+  color: var(--chat-color-text);
+  font-size: 18px;
+  line-height: 1.35;
+}
+
 .emptyStateText {
   margin: 0;
   color: var(--chat-color-text-secondary);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
+}
+
+@media (max-width: 767px) {
+  .layout {
+    --chat-header-height: 64px;
+    --chat-footer-height: 60px;
+
+    display: block;
+  }
+
+  .sidebarLayer {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    width: min(360px, calc(100% - 28px));
+    visibility: hidden;
+    pointer-events: none;
+    box-shadow: 10px 0 32px rgba(23, 43, 41, 0.18);
+    transform: translateX(-100%);
+    transition:
+      transform 0.24s ease,
+      visibility 0s linear 0.24s;
+  }
+
+  .sidebarOpen,
+  .sidebarOnly {
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(0);
+    transition:
+      transform 0.24s ease,
+      visibility 0s;
+  }
+
+  .sidebarOnly {
+    width: 100%;
+    box-shadow: none;
+  }
+
+  .resizeHandle {
+    display: none;
+  }
+
+  .mobileMenuButton.mobileMenuButton {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 15;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--chat-color-text);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .mobileMenuButton:focus-visible {
+    outline: 2px solid var(--chat-color-primary);
+    outline-offset: 2px;
+  }
+
+  .sidebarBackdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: pointer;
+    background: rgba(23, 43, 41, 0.32);
+    border: 0;
+    animation: backdropIn 0.2s ease;
+  }
+
+  .emptyState {
+    padding: 20px;
+  }
+
+  .emptyStateContent {
+    max-width: 300px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebarLayer,
+  .sidebarOpen,
+  .sidebarOnly {
+    transition: none;
+  }
+
+  .sidebarBackdrop {
+    animation: none;
+  }
+}
+
+@keyframes backdropIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

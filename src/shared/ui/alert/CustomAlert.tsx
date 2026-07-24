@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import type { AlertProps } from 'antd/es/alert/Alert'
-import Alert from 'antd/es/alert/Alert'
+import type { AlertProps } from 'antd/es/alert/Alert';
+import Alert from 'antd/es/alert/Alert';
 
-type CustomAlertProps = Omit<AlertProps, 'message' | 'styles'>
+type CustomAlertProps = Omit<AlertProps, 'message' | 'styles'>;
 
 export const CustomAlert = ({
   role = 'alert',
@@ -39,5 +39,5 @@ export const CustomAlert = ({
       }}
       type={type}
     />
-  )
-}
+  );
+};

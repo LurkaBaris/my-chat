@@ -1,16 +1,38 @@
-import 'server-only'
+import 'server-only';
 
-import { prisma } from '@/shared/db/index.server'
-import { formatConversationTime } from '../lib/formatConversationTime'
-import { getConversationDisplayTitle } from '../lib/getConversationDisplayTitle'
-import type { ConversationPreview } from '../model/types'
+import { prisma } from '@/shared/db/index.server';
+import { formatChatDate } from '@/shared/lib';
 
-export const getConversations = async (currentUserId: string): Promise<ConversationPreview[]> => {
+import { getConversationDisplayTitle } from '../lib/getConversationDisplayTitle';
+import type { ConversationPreview } from '../model/types';
+
+export const getConversations = async (
+  currentUserId: string,
+  updatedAfter?: Date,
+): Promise<ConversationPreview[]> => {
   const conversations = await prisma.conversation.findMany({
     where: {
       participants: {
         some: { userId: currentUserId },
       },
+      OR: updatedAfter
+        ? [
+            {
+              createdAt: {
+                gte: updatedAfter,
+              },
+            },
+            {
+              messages: {
+                some: {
+                  createdAt: {
+                    gte: updatedAfter,
+                  },
+                },
+              },
+            },
+          ]
+        : undefined,
     },
     select: {
       id: true,
@@ -42,17 +64,17 @@ export const getConversations = async (currentUserId: string): Promise<Conversat
         take: 1,
       },
     },
-  })
+  });
 
   return conversations
     .sort((first, second) => {
-      const firstActivityAt = first.messages[0]?.createdAt ?? first.createdAt
-      const secondActivityAt = second.messages[0]?.createdAt ?? second.createdAt
+      const firstActivityAt = first.messages[0]?.createdAt ?? first.createdAt;
+      const secondActivityAt = second.messages[0]?.createdAt ?? second.createdAt;
 
-      return secondActivityAt.getTime() - firstActivityAt.getTime()
+      return secondActivityAt.getTime() - firstActivityAt.getTime();
     })
     .map((conversation) => {
-      const lastMessage = conversation.messages[0] ?? null
+      const lastMessage = conversation.messages[0] ?? null;
 
       return {
         id: conversation.id,
@@ -61,10 +83,10 @@ export const getConversations = async (currentUserId: string): Promise<Conversat
         createdAt: conversation.createdAt,
         displayTitle: getConversationDisplayTitle(conversation, currentUserId),
         lastMessage,
-        time: formatConversationTime(lastMessage?.createdAt ?? conversation.createdAt),
-      }
-    })
-}
+        time: formatChatDate(lastMessage?.createdAt ?? conversation.createdAt, 'preview'),
+      };
+    });
+};
 
 export const getConversationPreview = async (
   conversationId: string,
@@ -107,11 +129,11 @@ export const getConversationPreview = async (
         take: 1,
       },
     },
-  })
+  });
 
-  if (!conversation) return null
+  if (!conversation) return null;
 
-  const lastMessage = conversation.messages[0] ?? null
+  const lastMessage = conversation.messages[0] ?? null;
 
   return {
     id: conversation.id,
@@ -120,6 +142,6 @@ export const getConversationPreview = async (
     createdAt: conversation.createdAt,
     displayTitle: getConversationDisplayTitle(conversation, currentUserId),
     lastMessage,
-    time: formatConversationTime(lastMessage?.createdAt ?? conversation.createdAt),
-  }
-}
+    time: formatChatDate(lastMessage?.createdAt ?? conversation.createdAt, 'preview'),
+  };
+};

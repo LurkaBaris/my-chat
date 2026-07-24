@@ -1,14 +1,14 @@
-import { Card } from 'antd'
-import Paragraph from 'antd/es/typography/Paragraph'
-import type { ReactNode } from 'react'
+import { Card } from 'antd';
+import Paragraph from 'antd/es/typography/Paragraph';
+import type { ReactNode } from 'react';
 
-import styles from './CustomCard.module.css'
+import styles from './CustomCard.module.css';
 
 interface CustomCardProps {
-  children?: ReactNode
-  description: ReactNode
-  footer: ReactNode
-  title: ReactNode
+  children?: ReactNode;
+  description: ReactNode;
+  footer: ReactNode;
+  title: ReactNode;
 }
 
 export const CustomCard = ({ children, description, footer, title }: CustomCardProps) => {
@@ -43,5 +43,5 @@ export const CustomCard = ({ children, description, footer, title }: CustomCardP
         {footer}
       </Paragraph>
     </Card>
-  )
-}
+  );
+};

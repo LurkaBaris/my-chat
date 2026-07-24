@@ -1,83 +1,167 @@
-'use client'
+'use client';
 
 import {
   ConversationListItem,
-  formatConversationTime,
   parseChatListEvent,
   type ConversationPreview,
-} from '@/entities/conversation'
-import { App, Flex } from 'antd'
-import { useParams } from 'next/navigation'
-import { useEffect, useState, type ReactNode } from 'react'
+} from '@/entities/conversation';
+import { formatChatDate } from '@/shared/lib';
+import { useAppNotification } from '@/shared/ui';
+import { Button, Flex } from 'antd';
+import { X } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { useEffect, useState, type ReactNode } from 'react';
 
-import { ChatListEmptyState } from './ChatListEmptyState'
-import styles from './ChatListWidget.module.css'
+import { ChatListEmptyState } from './ChatListEmptyState';
+import styles from './ChatListWidget.module.css';
 
 interface ChatListWidgetProps {
-  children: ReactNode
-  conversations: ConversationPreview[]
+  children: ReactNode;
+  conversations: ConversationPreview[];
+  onClose?: () => void;
+  onConversationSelect?: () => void;
 }
 
-export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps) => {
-  const { conversationId } = useParams<{ conversationId?: string }>()
-  const { notification } = App.useApp()
-  const [liveConversations, setLiveConversations] = useState(conversations)
+export const ChatListWidget = ({
+  children,
+  conversations,
+  onClose,
+  onConversationSelect,
+}: ChatListWidgetProps) => {
+  const { conversationId } = useParams<{ conversationId?: string }>();
+  const showNotification = useAppNotification();
+  const [liveConversations, setLiveConversations] = useState(conversations);
+  const latestConversation = conversations[0];
+  const initialCursor =
+    (latestConversation?.lastMessage?.createdAt ?? latestConversation?.createdAt)?.getTime() ?? 0;
 
   useEffect(() => {
-    const eventSource = new EventSource('/api/chat/stream')
+    const eventSource = new EventSource(`/api/chat/stream?since=${initialCursor}`);
 
     eventSource.onmessage = (event) => {
-      const chatListEvent = parseChatListEvent(event.data)
+      const chatListEvent = parseChatListEvent(event.data);
 
       if (!chatListEvent) {
-        notification.error({
+        showNotification({
+          type: 'error',
           title: 'Не удалось обновить список чатов',
-          description: 'Не удалось обработать новое событие. Обновите страницу.',
+          description: 'Не удалось обработать новое событие. Обновите страницу',
           key: 'realtime-chat-list-error',
-          placement: 'topRight',
-        })
-        return
+        });
+        return;
       }
 
       setLiveConversations((currentConversations) => {
         if (chatListEvent.type === 'conversation.created') {
+          const currentConversation = currentConversations.find(
+            (conversation) => conversation.id === chatListEvent.conversation.id,
+          );
+          const currentActivityAt =
+            currentConversation?.lastMessage?.createdAt ?? currentConversation?.createdAt;
+          const nextActivityAt =
+            chatListEvent.conversation.lastMessage?.createdAt ??
+            chatListEvent.conversation.createdAt;
+
+          if (currentActivityAt && currentActivityAt > nextActivityAt) {
+            return currentConversations;
+          }
+
           return [
             chatListEvent.conversation,
             ...currentConversations.filter(
               (conversation) => conversation.id !== chatListEvent.conversation.id,
             ),
-          ]
+          ];
         }
 
         const conversation = currentConversations.find(
           (conversation) => conversation.id === chatListEvent.message.conversationId,
-        )
+        );
 
         if (!conversation || conversation.lastMessage?.id === chatListEvent.message.id) {
-          return currentConversations
+          return currentConversations;
+        }
+
+        if (
+          conversation.lastMessage &&
+          conversation.lastMessage.createdAt > chatListEvent.message.createdAt
+        ) {
+          return currentConversations;
         }
 
         return [
           {
             ...conversation,
             lastMessage: chatListEvent.message,
-            time: formatConversationTime(chatListEvent.message.createdAt),
+            time: formatChatDate(chatListEvent.message.createdAt, 'preview'),
           },
           ...currentConversations.filter(
             (currentConversation) => currentConversation.id !== conversation.id,
           ),
-        ]
-      })
-    }
+        ];
+      });
+    };
 
-    return () => eventSource.close()
-  }, [notification])
+    let isCheckingAccess = false;
+    let isClosed = false;
+
+    eventSource.onerror = async () => {
+      if (isCheckingAccess || isClosed) return;
+
+      isCheckingAccess = true;
+
+      try {
+        const response = await fetch('/api/chat/stream?check=access', {
+          cache: 'no-store',
+        });
+
+        if (isClosed || (response.status !== 401 && response.status !== 403)) return;
+
+        eventSource.close();
+        isClosed = true;
+
+        showNotification({
+          type: 'error',
+          title: 'Обновление списка чатов остановлено',
+          description: 'Сессия истекла. Войдите в аккаунт снова',
+          key: 'chat-list-stream-access-error',
+        });
+      } catch {
+        showNotification({
+          type: 'warning',
+          title: 'Нет соединения с сервером',
+          description: 'Список чатов обновится после восстановления соединения',
+          key: 'chat-list-stream-connection-warning',
+        });
+      } finally {
+        isCheckingAccess = false;
+      }
+    };
+
+    return () => {
+      isClosed = true;
+      eventSource.close();
+    };
+  }, [initialCursor, showNotification]);
 
   return (
     <aside className={styles.sidebar} id="chat-list-panel">
       <header className={styles.header}>
-        <h1 className={styles.title}>Чаты</h1>
-        <p className={styles.subtitle}>Последние диалоги</p>
+        <div className={styles.headerText}>
+          <h1 className={styles.title}>Чаты</h1>
+          <p className={styles.subtitle}>Последние диалоги</p>
+        </div>
+
+        {onClose && (
+          <Button
+            aria-label="Закрыть список чатов"
+            className={styles.closeButton}
+            icon={<X aria-hidden size={21} />}
+            onClick={onClose}
+            shape="circle"
+            type="text"
+          />
+        )}
       </header>
 
       <nav className={styles.content}>
@@ -91,8 +175,9 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
                   conversation={conversation}
                   isActive={conversation.id === conversationId}
                   key={conversation.id}
+                  onSelect={onConversationSelect}
                 />
-              )
+              );
             })}
           </Flex>
         )}
@@ -100,5 +185,5 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
 
       <footer className={styles.actions}>{children}</footer>
     </aside>
-  )
-}
+  );
+};

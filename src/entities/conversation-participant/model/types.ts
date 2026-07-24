@@ -1,3 +1,3 @@
-import type { ConversationParticipant as PrismaConversationParticipant } from '@prisma/client'
+import type { ConversationParticipant as PrismaConversationParticipant } from '@prisma/client';
 
-export type ConversationParticipant = PrismaConversationParticipant
+export type ConversationParticipant = PrismaConversationParticipant;

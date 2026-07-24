@@ -1,18 +1,18 @@
-import type { NextAuthConfig } from 'next-auth'
+import type { NextAuthConfig } from 'next-auth';
 
 export const baseAuthConfig: Omit<NextAuthConfig, 'providers'> = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id = user.id;
       }
-      return token
+      return token;
     },
     session({ session, token }) {
       if (token.id && session.user) {
-        session.user.id = token.id
+        session.user.id = token.id;
       }
-      return session
+      return session;
     },
   },
-}
+};

@@ -1,18 +1,18 @@
-'use server'
+'use server';
 
 import {
   getConversationPreview,
   publishChatListEventToUsers,
-} from '@/entities/conversation/index.server'
-import { prisma } from '@/shared/db/index.server'
-import { isAuthUser } from '@/shared/lib'
-import { auth } from '@/shared/lib/index.server'
-import { Prisma } from '@prisma/client'
-import { createDirectConversationKey } from '../lib/createDirectConversationKey'
-import { startConversationSchema } from '../model/startConversationSchema'
-import type { DirectConversationResult, StartConversationResult } from '../model/types'
+} from '@/entities/conversation/index.server';
+import { prisma } from '@/shared/db/index.server';
+import { isAuthUser } from '@/shared/lib';
+import { auth } from '@/shared/lib/index.server';
+import { Prisma } from '@prisma/client';
+import { createDirectConversationKey } from '../lib/createDirectConversationKey';
+import { startConversationSchema } from '../model/startConversationSchema';
+import type { DirectConversationResult, StartConversationResult } from '../model/types';
 
-const START_CONVERSATION_ERROR_MESSAGE = 'Не удалось создать чат'
+const START_CONVERSATION_ERROR_MESSAGE = 'Не удалось создать чат';
 
 async function findExistingDirectConversation(
   database: Pick<Prisma.TransactionClient, 'conversation'>,
@@ -21,31 +21,31 @@ async function findExistingDirectConversation(
   const conversation = await database.conversation.findUnique({
     where: { directKey },
     select: { id: true },
-  })
+  });
 
   if (!conversation) {
-    return null
+    return null;
   }
 
   return {
     conversationId: conversation.id,
     isCreated: false,
-  }
+  };
 }
 
 async function findOrCreateDirectConversation(
   currentUserId: string,
   otherUserId: string,
 ): Promise<DirectConversationResult> {
-  const participantIds = [currentUserId, otherUserId]
-  const directKey = createDirectConversationKey(currentUserId, otherUserId)
+  const participantIds = [currentUserId, otherUserId];
+  const directKey = createDirectConversationKey(currentUserId, otherUserId);
 
   try {
     return await prisma.$transaction(async (transaction) => {
-      const existingConversation = await findExistingDirectConversation(transaction, directKey)
+      const existingConversation = await findExistingDirectConversation(transaction, directKey);
 
       if (existingConversation) {
-        return existingConversation
+        return existingConversation;
       }
 
       const conversation = await transaction.conversation.create({
@@ -57,86 +57,86 @@ async function findOrCreateDirectConversation(
           },
         },
         select: { id: true },
-      })
+      });
 
       return {
         conversationId: conversation.id,
         isCreated: true,
-      }
-    })
+      };
+    });
   } catch (error) {
     if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
-      throw error
+      throw error;
     }
 
-    const existingConversation = await findExistingDirectConversation(prisma, directKey)
+    const existingConversation = await findExistingDirectConversation(prisma, directKey);
 
     if (!existingConversation) {
-      throw error
+      throw error;
     }
 
-    return existingConversation
+    return existingConversation;
   }
 }
 
 export async function startConversationByEmail(data: unknown): Promise<StartConversationResult> {
-  const session = await auth()
+  const session = await auth();
 
   if (!isAuthUser(session?.user)) {
-    return { success: false, message: 'Необходимо войти в аккаунт' }
+    return { success: false, message: 'Необходимо войти в аккаунт' };
   }
 
-  const formResult = startConversationSchema.safeParse(data)
+  const formResult = startConversationSchema.safeParse(data);
 
   if (!formResult.success) {
     return {
       success: false,
       message: formResult.error.issues[0]?.message ?? 'Некорректный email',
-    }
+    };
   }
 
   try {
     const otherUser = await prisma.user.findUnique({
       where: { email: formResult.data.email },
       select: { id: true, email: true, name: true },
-    })
+    });
 
     if (!otherUser) {
       return {
         success: false,
         message: START_CONVERSATION_ERROR_MESSAGE,
-      }
+      };
     }
 
     if (session.user.id === otherUser.id) {
-      return { success: false, message: START_CONVERSATION_ERROR_MESSAGE }
+      return { success: false, message: START_CONVERSATION_ERROR_MESSAGE };
     }
 
-    const conversation = await findOrCreateDirectConversation(session.user.id, otherUser.id)
+    const conversation = await findOrCreateDirectConversation(session.user.id, otherUser.id);
 
     if (conversation.isCreated) {
       await Promise.allSettled(
         [session.user.id, otherUser.id].map(async (userId) => {
-          const preview = await getConversationPreview(conversation.conversationId, userId)
+          const preview = await getConversationPreview(conversation.conversationId, userId);
 
-          if (!preview) return
+          if (!preview) return;
 
           publishChatListEventToUsers([userId], {
             type: 'conversation.created',
             conversation: preview,
-          })
+          });
         }),
-      )
+      );
     }
 
     return {
       success: true,
       conversationId: conversation.conversationId,
-    }
+    };
   } catch {
     return {
       success: false,
       message: START_CONVERSATION_ERROR_MESSAGE,
-    }
+    };
   }
 }
