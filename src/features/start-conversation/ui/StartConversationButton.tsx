@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { CustomInput } from '@/shared/ui'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Form, Modal } from 'antd'
-import { MessageCirclePlus } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useForm, type SubmitHandler } from 'react-hook-form'
-import { startConversationByEmail } from '../actions/startConversation.action'
+import { CustomInput } from '@/shared/ui';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button, Form, Modal } from 'antd';
+import { MessageCirclePlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { startConversationByEmail } from '../actions/startConversation.action';
 import {
   startConversationSchema,
   type StartConversationSchemaType,
-} from '../model/startConversationSchema'
-import styles from './StartConversationButton.module.css'
+} from '../model/startConversationSchema';
+import styles from './StartConversationButton.module.css';
 
 export const StartConversationButton = () => {
-  const router = useRouter()
-  const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
   const {
     control,
     handleSubmit,
@@ -27,34 +27,34 @@ export const StartConversationButton = () => {
     resolver: zodResolver(startConversationSchema),
     defaultValues: { email: '' },
     mode: 'onTouched',
-  })
+  });
 
   const closeModal = () => {
-    if (isSubmitting) return
+    if (isSubmitting) return;
 
-    setIsOpen(false)
-    reset()
-  }
+    setIsOpen(false);
+    reset();
+  };
 
   const handleCreate: SubmitHandler<StartConversationSchemaType> = async (data) => {
     try {
-      const result = await startConversationByEmail(data)
+      const result = await startConversationByEmail(data);
 
       if (!result.success) {
-        setError('email', { type: 'server', message: result.message })
-        return
+        setError('email', { type: 'server', message: result.message });
+        return;
       }
 
-      setIsOpen(false)
-      reset()
-      router.push(`/chat/${result.conversationId}`)
+      setIsOpen(false);
+      reset();
+      router.push(`/chat/${result.conversationId}`);
     } catch {
       setError('email', {
         type: 'server',
         message: 'Не удалось создать чат. Попробуйте ещё раз',
-      })
+      });
     }
-  }
+  };
 
   return (
     <>
@@ -110,5 +110,5 @@ export const StartConversationButton = () => {
         </Form>
       </Modal>
     </>
-  )
-}
+  );
+};

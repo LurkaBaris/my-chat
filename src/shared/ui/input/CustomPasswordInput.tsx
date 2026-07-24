@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { Form } from 'antd'
-import Password from 'antd/es/input/Password'
-import type { PasswordProps } from 'antd/es/input/Password'
-import { Controller, type FieldValues } from 'react-hook-form'
+import { Form } from 'antd';
+import Password from 'antd/es/input/Password';
+import type { PasswordProps } from 'antd/es/input/Password';
+import { Controller, type FieldValues } from 'react-hook-form';
 
-import styles from './CustomInput.module.css'
-import type { CustomFieldProps } from './types'
+import styles from './CustomInput.module.css';
+import type { CustomFieldProps } from './types';
 
 type CustomPasswordInputProps<TFieldValues extends FieldValues> = CustomFieldProps<TFieldValues> &
-  Omit<PasswordProps, 'defaultValue' | 'id' | 'name' | 'onBlur' | 'onChange' | 'status' | 'value'>
+  Omit<PasswordProps, 'defaultValue' | 'id' | 'name' | 'onBlur' | 'onChange' | 'status' | 'value'>;
 
 export function CustomPasswordInput<TFieldValues extends FieldValues>({
   control,
@@ -24,8 +24,8 @@ export function CustomPasswordInput<TFieldValues extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState }) => {
-        const hasError = Boolean(fieldState.error)
-        const errorMessage = fieldState.error?.message
+        const hasError = Boolean(fieldState.error);
+        const errorMessage = fieldState.error?.message;
 
         return (
           <Form.Item
@@ -47,8 +47,8 @@ export function CustomPasswordInput<TFieldValues extends FieldValues>({
               onChange={field.onChange}
             />
           </Form.Item>
-        )
+        );
       }}
     />
-  )
+  );
 }

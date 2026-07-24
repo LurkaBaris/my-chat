@@ -1,1 +1,1 @@
-export type { ConversationParticipant } from './model/types'
+export type { ConversationParticipant } from './model/types';

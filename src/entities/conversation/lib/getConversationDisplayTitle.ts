@@ -1,15 +1,15 @@
-import type { Conversation } from '../model/types'
+import type { Conversation } from '../model/types';
 
 interface ConversationTitleData {
-  type: Conversation['type']
-  title: Conversation['title']
+  type: Conversation['type'];
+  title: Conversation['title'];
   participants: Array<{
-    userId: string
+    userId: string;
     user: {
-      email: string
-      name: string | null
-    }
-  }>
+      email: string;
+      name: string | null;
+    };
+  }>;
 }
 
 export const getConversationDisplayTitle = (
@@ -17,12 +17,12 @@ export const getConversationDisplayTitle = (
   currentUserId: string,
 ) => {
   if (conversation.type === 'GROUP') {
-    return conversation.title ?? 'Групповой чат'
+    return conversation.title ?? 'Групповой чат';
   }
 
   const otherUser = conversation.participants.find(
     (participant) => participant.userId !== currentUserId,
-  )?.user
+  )?.user;
 
-  return otherUser?.name?.trim() || otherUser?.email || 'Пользователь'
-}
+  return otherUser?.name?.trim() || otherUser?.email || 'Пользователь';
+};
