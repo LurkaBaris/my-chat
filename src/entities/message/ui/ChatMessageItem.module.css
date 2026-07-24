@@ -23,7 +23,6 @@
 
 .author {
   display: block;
-  margin-bottom: 4px;
   color: inherit;
   font-size: 12px;
   font-weight: 700;
@@ -35,9 +34,12 @@
   white-space: pre-wrap;
 }
 
+.top {
+  margin-bottom: 6px;
+}
+
 .time {
   display: block;
-  margin-top: 4px;
   font-size: 11px;
   line-height: 1.2;
   text-align: right;
