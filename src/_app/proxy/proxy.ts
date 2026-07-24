@@ -9,7 +9,7 @@ export const authProxy = auth((request) => {
   const isAuth = isAuthUser(request.auth?.user);
 
   if (pathname === '/') {
-    return NextResponse.redirect(new URL('/chat', request.url));
+    return NextResponse.redirect(new URL(isAuth ? '/chat' : '/login', request.url));
   }
 
   if (!isAuth && !isAuthRoute(pathname)) {
