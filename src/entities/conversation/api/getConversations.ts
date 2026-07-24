@@ -5,12 +5,33 @@ import { formatConversationTime } from '../lib/formatConversationTime';
 import { getConversationDisplayTitle } from '../lib/getConversationDisplayTitle';
 import type { ConversationPreview } from '../model/types';
 
-export const getConversations = async (currentUserId: string): Promise<ConversationPreview[]> => {
+export const getConversations = async (
+  currentUserId: string,
+  updatedAfter?: Date,
+): Promise<ConversationPreview[]> => {
   const conversations = await prisma.conversation.findMany({
     where: {
       participants: {
         some: { userId: currentUserId },
       },
+      OR: updatedAfter
+        ? [
+            {
+              createdAt: {
+                gte: updatedAfter,
+              },
+            },
+            {
+              messages: {
+                some: {
+                  createdAt: {
+                    gte: updatedAfter,
+                  },
+                },
+              },
+            },
+          ]
+        : undefined,
     },
     select: {
       id: true,

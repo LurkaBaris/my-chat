@@ -7,7 +7,8 @@ import {
   type MessageWithSender,
 } from '@/entities/message';
 import { MessageComposer } from '@/features/send-message';
-import { App, Avatar, Button, Flex } from 'antd';
+import { useAppNotification } from '@/shared/ui';
+import { Avatar, Button, Flex } from 'antd';
 import { ArrowDown } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './ChatMessagesWidget.module.css';
@@ -28,9 +29,10 @@ export const ChatMessagesWidget = ({
   const messagesRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
   const isInitialScrollRef = useRef(true);
-  const { notification } = App.useApp();
+  const showNotification = useAppNotification();
   const [liveMessages, setLiveMessages] = useState(messages);
   const [isScrollButtonVisible, setIsScrollButtonVisible] = useState(false);
+  const initialLastMessageId = messages[messages.length - 1]?.id;
   const latestMessageId = liveMessages[liveMessages.length - 1]?.id;
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
@@ -76,37 +78,81 @@ export const ChatMessagesWidget = ({
         return currentMessages;
       }
 
-      return [...currentMessages, message];
+      return [...currentMessages, message].sort((firstMessage, secondMessage) => {
+        return (
+          firstMessage.createdAt.getTime() - secondMessage.createdAt.getTime() ||
+          firstMessage.id.localeCompare(secondMessage.id)
+        );
+      });
     });
   }, []);
 
-  const showMessageError = useCallback(() => {
-    notification.error({
-      title: 'Не удалось обновить чат',
-      description: 'Не удалось обработать новое сообщение. Обновите страницу.',
-      key: 'realtime-message-error',
-      placement: 'topRight',
-    });
-  }, [notification]);
-
   useEffect(() => {
-    const eventSource = new EventSource(`/api/chat/${conversation.id}/stream`);
+    const streamUrl = `/api/chat/${conversation.id}/stream`;
+    const eventSourceUrl = initialLastMessageId
+      ? `${streamUrl}?lastMessageId=${encodeURIComponent(initialLastMessageId)}`
+      : streamUrl;
+    const eventSource = new EventSource(eventSourceUrl);
+    let isCheckingAccess = false;
+    let isClosed = false;
 
     eventSource.onmessage = (event) => {
       const message = parseMessageWithSender(event.data);
 
       if (!message) {
-        showMessageError();
+        showNotification({
+          type: 'error',
+          title: 'Не удалось обновить чат',
+          description: 'Не удалось обработать новое сообщение. Обновите страницу.',
+          key: 'realtime-message-error',
+        });
         return;
       }
 
       addMessage(message);
     };
 
+    eventSource.onerror = async () => {
+      if (isCheckingAccess || isClosed) return;
+
+      isCheckingAccess = true;
+
+      try {
+        const response = await fetch(`${streamUrl}?check=access`, {
+          cache: 'no-store',
+        });
+
+        if (isClosed || (response.status !== 401 && response.status !== 403)) return;
+
+        eventSource.close();
+        isClosed = true;
+
+        showNotification({
+          type: 'error',
+          title: 'Соединение с чатом закрыто',
+          description:
+            response.status === 401
+              ? 'Сессия истекла. Войдите в аккаунт снова'
+              : 'У вас больше нет доступа к этой беседе',
+          key: 'chat-stream-access-error',
+        });
+      } catch {
+        showNotification({
+          type: 'warning',
+          title: 'Нет соединения с сервером',
+          description: 'Новые сообщения появятся после восстановления соединения',
+          key: 'chat-stream-connection-warning',
+        });
+      } finally {
+        isCheckingAccess = false;
+      }
+    };
+
     return () => {
+      isClosed = true;
       eventSource.close();
     };
-  }, [addMessage, conversation.id, showMessageError]);
+  }, [addMessage, conversation.id, initialLastMessageId, showNotification]);
 
   useEffect(() => {
     if (!latestMessageId) return;
