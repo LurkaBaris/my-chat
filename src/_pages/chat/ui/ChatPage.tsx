@@ -4,8 +4,10 @@ import type { ConversationPreview } from '@/entities/conversation';
 import { StartConversationButton } from '@/features/start-conversation';
 import type { AuthUser } from '@/shared/lib';
 import { ChatListWidget } from '@/widgets/chat-list';
-import { Avatar } from 'antd';
+import { Avatar, Button } from 'antd';
 import clsx from 'clsx';
+import { Menu } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import {
   useEffect,
   useRef,
@@ -26,10 +28,16 @@ interface ChatPageProps {
 }
 
 export const ChatPage = ({ actions, authUser, children, conversations }: ChatPageProps) => {
+  const { conversationId } = useParams<{ conversationId?: string }>();
   const layoutRef = useRef<HTMLDivElement>(null);
   const resizeStartRef = useRef<ResizeStart | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
+  const [isChatListOpen, setIsChatListOpen] = useState(false);
+
+  const closeChatList = () => {
+    setIsChatListOpen(false);
+  };
 
   const updateSidebarWidth = (width: number) => {
     const containerWidth = layoutRef.current?.getBoundingClientRect().width;
@@ -88,6 +96,20 @@ export const ChatPage = ({ actions, authUser, children, conversations }: ChatPag
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!isChatListOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsChatListOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isChatListOpen]);
+
   const displayName = authUser.name?.trim() || authUser.email?.trim() || 'Пользователь';
   const avatarLetter = displayName.charAt(0).toUpperCase();
 
@@ -98,24 +120,36 @@ export const ChatPage = ({ actions, authUser, children, conversations }: ChatPag
         ref={layoutRef}
         style={{ '--sidebar-width': `${sidebarWidth}px` } as CSSProperties}
       >
-        <ChatListWidget conversations={conversations}>
-          <StartConversationButton />
-          <div className={styles.userBar}>
-            <div className={styles.userProfile}>
-              <Avatar className={styles.userAvatar} size={32}>
-                {avatarLetter}
-              </Avatar>
+        <div
+          className={clsx(
+            styles.sidebarLayer,
+            !conversationId && styles.sidebarOnly,
+            isChatListOpen && styles.sidebarOpen,
+          )}
+        >
+          <ChatListWidget
+            conversations={conversations}
+            onClose={conversationId ? closeChatList : undefined}
+            onConversationSelect={closeChatList}
+          >
+            <StartConversationButton />
+            <div className={styles.userBar}>
+              <div className={styles.userProfile}>
+                <Avatar className={styles.userAvatar} size={32}>
+                  {avatarLetter}
+                </Avatar>
 
-              <div className={styles.userMeta}>
-                <p className={styles.userName}>{authUser.name || 'Пользователь'}</p>
+                <div className={styles.userMeta}>
+                  <p className={styles.userName}>{authUser.name || 'Пользователь'}</p>
 
-                {authUser.email && <p className={styles.userEmail}>{authUser.email}</p>}
+                  {authUser.email && <p className={styles.userEmail}>{authUser.email}</p>}
+                </div>
               </div>
-            </div>
 
-            <div className={styles.userActions}>{actions}</div>
-          </div>
-        </ChatListWidget>
+              <div className={styles.userActions}>{actions}</div>
+            </div>
+          </ChatListWidget>
+        </div>
 
         <button
           className={clsx(styles.resizeHandle, isResizing && styles.resizeHandleActive)}
@@ -129,6 +163,28 @@ export const ChatPage = ({ actions, authUser, children, conversations }: ChatPag
         />
 
         {children}
+
+        {conversationId && (
+          <Button
+            aria-controls="chat-list-panel"
+            aria-expanded={isChatListOpen}
+            aria-label="Показать мои чаты"
+            className={styles.mobileMenuButton}
+            id="mobile-chat-list-trigger"
+            icon={<Menu aria-hidden size={24} strokeWidth={2} />}
+            onClick={() => setIsChatListOpen(true)}
+            type="text"
+          />
+        )}
+
+        {conversationId && isChatListOpen && (
+          <button
+            aria-label="Закрыть список чатов"
+            className={styles.sidebarBackdrop}
+            onClick={closeChatList}
+            type="button"
+          />
+        )}
       </div>
     </main>
   );

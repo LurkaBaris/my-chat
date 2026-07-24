@@ -38,6 +38,7 @@ export default async function ConversationRoute({ params }: ConversationRoutePro
     <ChatMessagesWidget
       conversation={conversation}
       currentUserId={currentUserId}
+      key={conversation.id}
       messages={messages}
     />
   );

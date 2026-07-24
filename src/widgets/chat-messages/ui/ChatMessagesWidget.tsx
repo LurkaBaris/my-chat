@@ -9,7 +9,7 @@ import {
 import { MessageComposer } from '@/features/send-message';
 import { useAppNotification } from '@/shared/ui';
 import { Avatar, Button, Flex } from 'antd';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, MessageCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './ChatMessagesWidget.module.css';
 
@@ -177,15 +177,34 @@ export const ChatMessagesWidget = ({
           <h2 className={styles.chatTitle} id="active-chat-title">
             {conversation.displayTitle}
           </h2>
-          <span className={styles.chatStatus}>Онлайн</span>
+          {/* TODO: добавить статус онлайн после реализации presence. */}
         </Flex>
       </header>
 
       <div className={styles.messagesArea}>
-        <div className={styles.messages} onScroll={handleMessagesScroll} ref={messagesRef}>
-          {liveMessages.map((message) => (
-            <ChatMessageItem currentUserId={currentUserId} key={message.id} message={message} />
-          ))}
+        <div
+          aria-live="polite"
+          aria-relevant="additions"
+          className={styles.messages}
+          onScroll={handleMessagesScroll}
+          ref={messagesRef}
+          role="log"
+        >
+          {liveMessages.length === 0 ? (
+            <div className={styles.emptyMessages}>
+              <div aria-hidden className={styles.emptyMessagesIcon}>
+                <MessageCircle size={25} strokeWidth={1.8} />
+              </div>
+              <h3 className={styles.emptyMessagesTitle}>Напишите первое сообщение</h3>
+              <p className={styles.emptyMessagesText}>
+                Начните беседу — ваше сообщение появится здесь.
+              </p>
+            </div>
+          ) : (
+            liveMessages.map((message) => (
+              <ChatMessageItem currentUserId={currentUserId} key={message.id} message={message} />
+            ))
+          )}
         </div>
 
         {isScrollButtonVisible && (

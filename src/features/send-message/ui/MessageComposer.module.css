@@ -9,9 +9,12 @@
   border-top: 1px solid var(--chat-color-border-secondary);
 }
 
-.attachButton,
 .sendButton {
   flex: 0 0 auto;
+}
+
+.sendButton :global(.ant-btn-icon) {
+  display: none;
 }
 
 .field {
@@ -56,4 +59,33 @@
   border: 0;
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
+}
+
+@media (max-width: 767px) {
+  .composer {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .textarea {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 16px;
+  }
+
+  .sendButton {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+  }
+
+  .sendButton :global(.ant-btn-icon) {
+    display: inline-flex;
+  }
+
+  .sendButtonText {
+    display: none;
+  }
 }

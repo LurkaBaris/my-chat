@@ -7,7 +7,8 @@ import {
 } from '@/entities/conversation';
 import { formatChatDate } from '@/shared/lib';
 import { useAppNotification } from '@/shared/ui';
-import { Flex } from 'antd';
+import { Button, Flex } from 'antd';
+import { X } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 
@@ -17,9 +18,16 @@ import styles from './ChatListWidget.module.css';
 interface ChatListWidgetProps {
   children: ReactNode;
   conversations: ConversationPreview[];
+  onClose?: () => void;
+  onConversationSelect?: () => void;
 }
 
-export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps) => {
+export const ChatListWidget = ({
+  children,
+  conversations,
+  onClose,
+  onConversationSelect,
+}: ChatListWidgetProps) => {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const showNotification = useAppNotification();
   const [liveConversations, setLiveConversations] = useState(conversations);
@@ -37,7 +45,7 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
         showNotification({
           type: 'error',
           title: 'Не удалось обновить список чатов',
-          description: 'Не удалось обработать новое событие. Обновите страницу.',
+          description: 'Не удалось обработать новое событие. Обновите страницу',
           key: 'realtime-chat-list-error',
         });
         return;
@@ -115,14 +123,14 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
         showNotification({
           type: 'error',
           title: 'Обновление списка чатов остановлено',
-          description: 'Сессия истекла. Войдите в аккаунт снова.',
+          description: 'Сессия истекла. Войдите в аккаунт снова',
           key: 'chat-list-stream-access-error',
         });
       } catch {
         showNotification({
           type: 'warning',
           title: 'Нет соединения с сервером',
-          description: 'Список чатов обновится после восстановления соединения.',
+          description: 'Список чатов обновится после восстановления соединения',
           key: 'chat-list-stream-connection-warning',
         });
       } finally {
@@ -139,8 +147,21 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
   return (
     <aside className={styles.sidebar} id="chat-list-panel">
       <header className={styles.header}>
-        <h1 className={styles.title}>Чаты</h1>
-        <p className={styles.subtitle}>Последние диалоги</p>
+        <div className={styles.headerText}>
+          <h1 className={styles.title}>Чаты</h1>
+          <p className={styles.subtitle}>Последние диалоги</p>
+        </div>
+
+        {onClose && (
+          <Button
+            aria-label="Закрыть список чатов"
+            className={styles.closeButton}
+            icon={<X aria-hidden size={21} />}
+            onClick={onClose}
+            shape="circle"
+            type="text"
+          />
+        )}
       </header>
 
       <nav className={styles.content}>
@@ -154,6 +175,7 @@ export const ChatListWidget = ({ children, conversations }: ChatListWidgetProps)
                   conversation={conversation}
                   isActive={conversation.id === conversationId}
                   key={conversation.id}
+                  onSelect={onConversationSelect}
                 />
               );
             })}

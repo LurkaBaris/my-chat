@@ -8,9 +8,14 @@ import styles from './ConversationListItem.module.css';
 interface ConversationListItemProps {
   conversation: ConversationPreview;
   isActive: boolean;
+  onSelect?: () => void;
 }
 
-export const ConversationListItem = ({ conversation, isActive }: ConversationListItemProps) => {
+export const ConversationListItem = ({
+  conversation,
+  isActive,
+  onSelect,
+}: ConversationListItemProps) => {
   const activityAt = conversation.lastMessage?.createdAt ?? conversation.createdAt;
 
   return (
@@ -18,7 +23,7 @@ export const ConversationListItem = ({ conversation, isActive }: ConversationLis
       aria-current={isActive ? 'page' : undefined}
       className={clsx(styles.item, isActive && styles.active)}
       href={`/chat/${conversation.id}`}
-      prefetch={false}
+      onClick={onSelect}
     >
       <Avatar className={styles.avatar} size={44}>
         {conversation.displayTitle[0]}

@@ -1,9 +1,10 @@
 'use client';
 
+import type { MessageWithSender } from '@/entities/message';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { App, Button, Tooltip } from 'antd';
+import { App, Button } from 'antd';
 import TextArea from 'antd/es/input/TextArea.js';
-import { Paperclip } from 'lucide-react';
+import { Send } from 'lucide-react';
 import type { KeyboardEvent } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { sendMessage } from '../actions/sendMessage.action';
@@ -13,7 +14,6 @@ import {
   type SendMessageSchemaType,
 } from '../model/sendMessageSchema';
 import styles from './MessageComposer.module.css';
-import type { MessageWithSender } from '@/entities/message';
 
 interface MessageComposerProps {
   conversationId: string;
@@ -76,17 +76,7 @@ export const MessageComposer = ({ conversationId, onMessageSent }: MessageCompos
 
   return (
     <form className={styles.composer} noValidate onSubmit={submitMessage}>
-      <Tooltip title="Прикрепить файл">
-        <Button
-          className={styles.attachButton}
-          color="default"
-          disabled={isSubmitting}
-          htmlType="button"
-          icon={<Paperclip aria-hidden size={20} strokeWidth={1.8} />}
-          shape="circle"
-          type="text"
-        />
-      </Tooltip>
+      {/* TODO: добавить кнопку вложений после реализации загрузки файлов. */}
 
       <Controller
         control={control}
@@ -116,13 +106,15 @@ export const MessageComposer = ({ conversationId, onMessageSent }: MessageCompos
       />
 
       <Button
+        aria-label="Отправить сообщение"
         className={styles.sendButton}
         disabled={isSendDisabled}
         htmlType="submit"
+        icon={<Send aria-hidden size={16} strokeWidth={1} />}
         loading={isSubmitting}
         type="primary"
       >
-        Отправить
+        <span className={styles.sendButtonText}>Отправить</span>
       </Button>
     </form>
   );
