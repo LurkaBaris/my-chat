@@ -1,4 +1,5 @@
-import { messageWithSenderSchema } from '../model/messageWithSenderSchema';
+import { messageWithSenderSchema } from '@/shared/lib';
+
 import type { MessageWithSender } from '../model/types';
 
 export const parseMessageWithSender = (data: string): MessageWithSender | null => {

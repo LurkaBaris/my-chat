@@ -1,6 +1,16 @@
-import type { Conversation as PrismaConversation } from '@prisma/client';
+import type { Conversation as PrismaConversation, Prisma } from '@prisma/client';
 
-import type { MessageWithSender } from '@/entities/message';
+type MessageWithSender = Prisma.MessageGetPayload<{
+  include: {
+    sender: {
+      select: {
+        id: true;
+        email: true;
+        name: true;
+      };
+    };
+  };
+}>;
 
 export type Conversation = PrismaConversation;
 

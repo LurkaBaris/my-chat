@@ -1,4 +1,4 @@
-import { messageWithSenderSchema } from '@/entities/message';
+import { messageWithSenderSchema } from '@/shared/lib';
 import { z } from 'zod';
 
 import type { ChatListEvent, ConversationPreview } from './types';

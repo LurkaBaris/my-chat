@@ -1,6 +1,17 @@
+import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
-import type { MessageWithSender } from './types';
+type MessageWithSender = Prisma.MessageGetPayload<{
+  include: {
+    sender: {
+      select: {
+        id: true;
+        email: true;
+        name: true;
+      };
+    };
+  };
+}>;
 
 export const messageWithSenderSchema = z.object({
   id: z.string(),
