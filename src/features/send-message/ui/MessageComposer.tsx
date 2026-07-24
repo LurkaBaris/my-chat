@@ -1,27 +1,27 @@
-'use client'
+'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { App, Button, Tooltip } from 'antd'
-import TextArea from 'antd/es/input/TextArea.js'
-import { Paperclip } from 'lucide-react'
-import type { KeyboardEvent } from 'react'
-import { Controller, useForm, useWatch } from 'react-hook-form'
-import { sendMessage } from '../actions/sendMessage.action'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { App, Button, Tooltip } from 'antd';
+import TextArea from 'antd/es/input/TextArea.js';
+import { Paperclip } from 'lucide-react';
+import type { KeyboardEvent } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { sendMessage } from '../actions/sendMessage.action';
 import {
   MESSAGE_MAX_LENGTH,
   sendMessageSchema,
   type SendMessageSchemaType,
-} from '../model/sendMessageSchema'
-import styles from './MessageComposer.module.css'
-import type { MessageWithSender } from '@/entities/message'
+} from '../model/sendMessageSchema';
+import styles from './MessageComposer.module.css';
+import type { MessageWithSender } from '@/entities/message';
 
 interface MessageComposerProps {
-  conversationId: string
-  onMessageSent: (message: MessageWithSender) => void
+  conversationId: string;
+  onMessageSent: (message: MessageWithSender) => void;
 }
 
 export const MessageComposer = ({ conversationId, onMessageSent }: MessageComposerProps) => {
-  const { notification } = App.useApp()
+  const { notification } = App.useApp();
   const {
     control,
     handleSubmit,
@@ -34,9 +34,9 @@ export const MessageComposer = ({ conversationId, onMessageSent }: MessageCompos
       conversationId,
       body: '',
     },
-  })
-  const body = useWatch({ control, name: 'body' })
-  const isSendDisabled = isSubmitting || !body.trim()
+  });
+  const body = useWatch({ control, name: 'body' });
+  const isSendDisabled = isSubmitting || !body.trim();
 
   const showError = (description: string) => {
     notification.error({
@@ -44,35 +44,35 @@ export const MessageComposer = ({ conversationId, onMessageSent }: MessageCompos
       description,
       key: 'send-message-error',
       placement: 'topRight',
-    })
-  }
+    });
+  };
 
   const onSubmit = async ({ body }: SendMessageSchemaType) => {
     try {
-      const result = await sendMessage(conversationId, body)
+      const result = await sendMessage(conversationId, body);
 
       if (!result.success) {
-        showError(result.message)
-        return
+        showError(result.message);
+        return;
       }
 
-      onMessageSent(result.message)
-      resetField('body')
+      onMessageSent(result.message);
+      resetField('body');
     } catch {
-      showError('Не удалось отправить сообщение')
+      showError('Не удалось отправить сообщение');
     } finally {
-      setFocus('body')
+      setFocus('body');
     }
-  }
+  };
 
-  const submitMessage = handleSubmit(onSubmit)
+  const submitMessage = handleSubmit(onSubmit);
 
   const onPressEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) return
+    if (event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) return;
 
-    event.preventDefault()
-    submitMessage()
-  }
+    event.preventDefault();
+    submitMessage();
+  };
 
   return (
     <form className={styles.composer} noValidate onSubmit={submitMessage}>
@@ -125,5 +125,5 @@ export const MessageComposer = ({ conversationId, onMessageSent }: MessageCompos
         Отправить
       </Button>
     </form>
-  )
-}
+  );
+};

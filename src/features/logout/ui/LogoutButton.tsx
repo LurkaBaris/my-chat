@@ -1,10 +1,10 @@
-import { Button } from 'antd'
-import { LogOut } from 'lucide-react'
+import { Button } from 'antd';
+import { LogOut } from 'lucide-react';
 
-import { logout } from '../actions/logout.action'
+import { logout } from '../actions/logout.action';
 
 interface LogoutButtonProps {
-  iconOnly?: boolean
+  iconOnly?: boolean;
 }
 
 export const LogoutButton = ({ iconOnly = false }: LogoutButtonProps) => {
@@ -19,5 +19,5 @@ export const LogoutButton = ({ iconOnly = false }: LogoutButtonProps) => {
         {iconOnly ? null : 'Выйти из аккаунта'}
       </Button>
     </form>
-  )
-}
+  );
+};

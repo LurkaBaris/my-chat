@@ -1,3 +1,3 @@
-import { handlers } from '@/shared/lib/index.server'
+import { handlers } from '@/shared/lib/index.server';
 
-export const { GET, POST } = handlers
+export const { GET, POST } = handlers;

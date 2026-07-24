@@ -1,21 +1,21 @@
-'use client'
+'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { App, Button, Form } from 'antd'
-import { useForm, type SubmitHandler } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { App, Button, Form } from 'antd';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 
-import { CustomAlert } from '@/shared/ui/alert'
-import { CustomInput, CustomPasswordInput } from '@/shared/ui/input'
+import { CustomAlert } from '@/shared/ui/alert';
+import { CustomInput, CustomPasswordInput } from '@/shared/ui/input';
 
-import { registerUser } from '../actions/registerUser.action'
-import { signUpSchema, type SignUpSchemaType } from '../model/signUpSchema'
+import { registerUser } from '../actions/registerUser.action';
+import { signUpSchema, type SignUpSchemaType } from '../model/signUpSchema';
 
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import styles from './SignUpForm.module.css'
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import styles from './SignUpForm.module.css';
 
 export const SignUpForm = () => {
-  const { notification } = App.useApp()
+  const { notification } = App.useApp();
   const {
     control,
     handleSubmit,
@@ -32,44 +32,44 @@ export const SignUpForm = () => {
       confirmPassword: '',
     },
     mode: 'onTouched',
-  })
-  const router = useRouter()
+  });
+  const router = useRouter();
 
   const onSubmit: SubmitHandler<SignUpSchemaType> = async (data) => {
-    clearErrors('root')
+    clearErrors('root');
 
-    const result = await registerUser(data)
+    const result = await registerUser(data);
     if (!result.success) {
       if (result.field === 'email') {
-        setError('email', { type: 'server', message: result.message })
+        setError('email', { type: 'server', message: result.message });
       } else {
-        setError('root.server', { type: 'server', message: result.message })
+        setError('root.server', { type: 'server', message: result.message });
       }
-      return
+      return;
     }
 
     const signInResult = await signIn('credentials', {
       email: data.email,
       password: data.password,
       redirect: false,
-    })
+    });
 
     if (!signInResult || signInResult.error || !signInResult.ok) {
       setError('root.server', {
         type: 'server',
         message: 'Регистрация успешна, но не удалось войти автоматически',
-      })
-      router.replace('/login')
-      return
+      });
+      router.replace('/login');
+      return;
     }
 
     notification.success({
       title: 'Регистрация завершена',
       description: 'Вы успешно вошли в аккаунт',
-    })
-    router.replace('/chat')
-    reset()
-  }
+    });
+    router.replace('/chat');
+    reset();
+  };
 
   return (
     <Form layout="vertical" noValidate onFinish={() => void handleSubmit(onSubmit)()}>
@@ -128,5 +128,5 @@ export const SignUpForm = () => {
         </Button>
       </div>
     </Form>
-  )
-}
+  );
+};

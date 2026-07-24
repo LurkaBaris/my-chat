@@ -1,1 +1,1 @@
-export { ChatListWidget } from './ui/ChatListWidget'
+export { ChatListWidget } from './ui/ChatListWidget';

@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Form } from 'antd'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useForm, type SubmitHandler } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button, Form } from 'antd';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 
-import { credentialsSchema, type CredentialsSchemaType } from '@/shared/lib'
-import { CustomAlert } from '@/shared/ui/alert'
-import { CustomInput, CustomPasswordInput } from '@/shared/ui/input'
+import { credentialsSchema, type CredentialsSchemaType } from '@/shared/lib';
+import { CustomAlert } from '@/shared/ui/alert';
+import { CustomInput, CustomPasswordInput } from '@/shared/ui/input';
 
-import styles from './LoginForm.module.css'
+import styles from './LoginForm.module.css';
 
 export const LoginForm = () => {
-  const router = useRouter()
+  const router = useRouter();
   const {
     control,
     handleSubmit,
@@ -27,35 +27,35 @@ export const LoginForm = () => {
       password: '',
     },
     mode: 'onTouched',
-  })
+  });
 
   const onSubmit: SubmitHandler<CredentialsSchemaType> = async (data) => {
-    clearErrors('root')
+    clearErrors('root');
 
     try {
       const result = await signIn('credentials', {
         ...data,
         redirect: false,
-      })
+      });
 
       if (!result.ok || result.error) {
         setError('root.server', {
           type: 'server',
           message: 'Неверный email или пароль',
-        })
+        });
 
-        return
+        return;
       }
 
-      router.refresh()
-      router.replace('/chat')
+      router.refresh();
+      router.replace('/chat');
     } catch {
       setError('root.server', {
         type: 'server',
         message: 'Не удалось войти. Попробуйте ещё раз',
-      })
+      });
     }
-  }
+  };
 
   return (
     <Form layout="vertical" noValidate onFinish={() => void handleSubmit(onSubmit)()}>
@@ -94,5 +94,5 @@ export const LoginForm = () => {
         </Button>
       </div>
     </Form>
-  )
-}
+  );
+};
